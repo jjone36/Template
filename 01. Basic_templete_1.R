@@ -335,7 +335,7 @@ hoslem.test(actualData, pred.y)
 
 # predict(fit_glm, newdata = data.frame(a= , b= ), type = 'response')
 
-## 3. Multinomial Case
+## 2. Multinomial Case
 library(nnet)
 fit = multinom(Type~., data = training, maxit = 500, trace = T)
 pred.prop = predict(fit, testing, type = 'probs')

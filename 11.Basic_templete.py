@@ -1,3 +1,5 @@
+'https://scikit-learn.org/stable/index.html'
+'https://campus.datacamp.com/courses/machine-learning-with-the-experts-school-budgets'
 #################################################
 ############# Data Preprocessing #############
 import pandas as pd
@@ -12,12 +14,16 @@ X = df.drop('party', axis=1).values
 
 # Impute values into NA
 from sklearn.preprocessing import Imputer
-imputer = Imputer(missing_values = 'NaN', strategy = 'median')
-imputer = imputer.fit(X[:, 1:3])
-X[:, 1:3] = imputer.transform(X[:, 1:3])
+imp = Imputer(missing_values = 'NaN', strategy = 'median', axis = 0)     # 'most_frequent'
+imp = imp.fit(X[:, 1:3])
+X[:, 1:3] = imp.transform(X[:, 1:3])
 print(X)
 
 # Encode categorical data
+X = pd.get_dummies(X)
+X = X.drop('columnName', axis = 1)
+X = pd.get_dummies(X, drop_first = True)
+
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 labelencoder = LabelEncoder()
 X[:, 0] = labelencoder.fit_transform(X[:, 0])
@@ -25,20 +31,21 @@ y = labelencoder.fit_transform(y)
 
 onehotencoder = OneHotEncoder(categorical_features = [0])
 X = onehotencoder.fit_transform(X).toarray()
-# Avoid the dummy variable trap
-
 
 # Split the dataset
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .2, random_state = 42)
 
 # Feature scaling
+from sklearn.preprocessing import scale
+X_scaled = scale(X)
+
 from sklearn.preprocessing import StandardScaler
 sc_X = StandardScaler()
 X_train = sc_X.fit_transform(X_train)
 X_test = sc_X.transform(X_tsst)
 
-############# Dimensionality Reduction #############
+###### Dimensionality Reduction
 # Pricipal Component Analysis
 from sklearn.decomposition import PCA
 pca = PCA(n_components = 2)
@@ -75,17 +82,44 @@ plt.show()
 
 reg.predict(new_value = 6.5)
 
+# R2
+reg.score(X_test, y_test)
+# RMSE
+from sklearn.metrics import mean_squared_error
+np.sqrt(mean_squared_error(y_test, y_pred))
+
 ###### K-fold Cross Validaion
 from sklearn.model_selection import cross_val_score
 accuracies = cross_val_score(estimator = reg, X = X_train, y = y_train, cv = 10)
 accuracies.mean()    # mean accuracy value of validation sets
 accuracies.std()
 
+cv_score = cross_val_score(estimator = eg, X, y, cv = 5, scoring = 'roc_auc')
+print(cv_score)
+
 
 ############# 2) Regularized Regression #############
-## Ridge
+###### Elastic-Net
+from sklearn.linear_model import ElasticNet
+elas = ElasticNet()
+myParam = {'l1_ratio': np.linspace(0, 1, 30)}
+
+gm_cv = GridSearchCV(elas, myParam, cv = 5)
+gm_cv.fit(X_train, y_train)
+y_pred = gm_cv.predict(X_test)
+
+gm_cv.best_score_
+gm_cv.best_params_
+print("Tuned ElasticNet l1 ratio: {}".format(gm_cv.best_params_))
+
+r2 = gm_cv.score(X_test, y_test)
+rmse = gm_cv.mean_squared_error(y_test, y_pred)
+print("Tuned ElasticNet R squared: {}".format(r2))
+print("Tuned ElasticNet MSE: {}".format(mse))
+
+###### Ridge
 from sklearn.linear_model import Ridge
-ridge = Ridge(alpha, normalize = True)
+ridge = Ridge(alpha = .3, normalize = True)
 ridge.fit(X_train, y_train)
 ridge.predict(X_test)
 
@@ -109,13 +143,12 @@ for alpha in alpha_space:
 display_plot(ridge_scores, ridge_scores_std)
 
 
-## Lasso   (-> feature selection)
+###### Lasso   (-> feature selection)
 from sklearn.linear_model import Lasso
 lasso = Lasso(alpha, normalize = True)
 lasso.fit(X_train, y_train)
 lasso.predict(X_test)
 lasso_coef = lasso.coef_
-
 
 # Plot the coefficients
 plt.plot(range(len(df_columns)), lasso_coef)
@@ -151,7 +184,7 @@ y_pred = clas.predict(X_test)
 from sklearn.linear_model import LogisticRegression
 clas = LogisticRegression()
 clas.fit(X_train, y_train)
-y_pred = clas.pred(X_test)
+y_pred = clas.predict(X_test)
 
 # Make the confusion matrix
 from sklearn.metrics import confusion_matrix
@@ -160,6 +193,15 @@ cm = confusion_matrix(y_test, y_pred)
 y_pred_prob = clas.predict_proba(X_test)[:, 1]
 from sklearn.metrics import roc_curve
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
+
+
+# StratifiedShuffleSplit
+
+# multiple class
+from sklearn.multiclass import OneVsRestClassifier
+clas = OneVsRestClassifier(LogisticRegression())
+
+
 
 
 ############# 2) Support Vector Machine #############
@@ -189,7 +231,6 @@ from sklearn.tree import DecisionTreeRegressor
 reg = DecisionTreeRegressor()
 reg.fit(X_train, y_train)
 
-
 from sklearn.tree import DecisionTreeClassifier
 clas = DecisionTreeClassifier(criterion = 'entropy')
 clas.fit(X_train, y_train)
@@ -199,7 +240,6 @@ clas.fit(X_train, y_train)
 from sklearn.tree import RandomForestRegressor
 reg = RandomForestRegressor(n_estimators = 100, max_depth = 5)
 reg.fit(X_train, y_train)
-
 
 from sklearn.ensemble import RandomForestClassifier
 clas = RandomForestClassifier(criterion = 'entropy', n_estimators = 100, max_depth = 5)
@@ -273,6 +313,7 @@ y_clus = clus.fit_predict(X)
 # R2
 reg.score(X_test, y_test)
 # RMSE
+from sklearn.metrics import mean_squared_error
 np.sqrt(mean_squared_error(y_test, y_pred))
 # confusion matrix
 from sklearn.metrics import confusion_matrix
@@ -280,28 +321,52 @@ from sklearn.metrics import classification_report
 cm = confusion_matrix(y_test, y_pred)
 classification_report(y_test, y_pred)
 # ROC
-from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_curve, roc_auc_score
 fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+roc_auc_score(y_test, y_pred_prob)
 
-
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(x = fpr, y = tpr)
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve')
+plt.show()
 
 
 ############# Grid Search #############
 from sklearn.model_selection import GridSearchCV
+# Logisitc
+c_space = np.logspace(-5, 8, 15)
+myParam = {'C': c_space, 'penalty': ['l1', 'l2']}
+# SVM
 myParam = [{'C': [1, 10, 100, 1000], 'kernel': ['linear']}
            {'C': [1, 10, 100, 1000], 'kernel': ['rbf'], 'gamma': [0.5, 0.1, 0.05, 0.01]}]
-myGrid = GridSearchCV(estimator = clas,
-                      param_grid = myParam,
-                      scoring = 'accuracy',
-                      '''n_jobs = -1,'''
-                      cv = 10)
-myGrid = myGrid.fit(X_train, y_train)
-best_score = myGrid.best_score_
-best_param = myGrid.best_params_
+# decisiontree
+myParam = {'max_depth': [3, None], 'max_features': randint(1, 9), 'criterion': ['gini', 'entropy']}
+# knn
+myParam = {'n_neighbors': np.arange(1, 50)}
+# elastic net
+myParam = {'l1_ratio': np.linspace(0, 1, 30)}
+
+cv = GridSearchCV(estimator = clas,
+                  param_grid = myParam,
+                  scoring = 'accuracy',
+                  '''n_jobs = -1,'''
+                  cv = 10)
+cv = cv.fit(X_train, y_train)
+
+best_score = cv.best_score_
+print("Best score is {}".format(best_score))
+best_param = cv.best_params_
 print(best_param)
 
+from sklearn.model_selection import RandomizedSearchCV
+cv = RandomizedSearchCV(estimator = clas,
+                        param_grid = myParam,
+                        cv = 5)
 
 
+#################################################
 ############# Variable Selection functions #############
 # Building the optimal model using Backward Eliminations
 import statsmodels.formula.api as sm

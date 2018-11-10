@@ -142,7 +142,8 @@ df = pd.read_csv('wine.csv')
 print(df.shape)    # dim(df)
 print(df.columns)    # names(df)
 print(df.info())    # str(df)
-print(df.dtypes)    # class()
+df.dtypes    # class()
+df.dtypes.value_counts()
 df.describe()    # summary(df)
 
 df['State'].count()     # length()
@@ -164,34 +165,34 @@ df.gender = df.gender.astype('str')
 df['total_price'] = pd.to_numeric(df['total_price'], errors = 'coerce')     # object => numeric + NaN
 df['date'] = pd.to_datetime(df['date'])
 
+# as.factor()
+df_dummies = pd.get_dummies(df)
+pd.get_dummies(df[['label']], prefix_sep = '_')
+categorizer = lambda x: x.astype('cateory')
+d[['label', 'sex']] = df[['label', 'sex']].apply(categorizer, axis = 0)
+
 df.pclass = pd.categorical(values = medals.pclass, categories = ['Bronze', 'Silver', 'Gold'], ordered = True)
 df.info()                    # ordering categories
 df.year = df.year.astype('category')
 df.year2 = df.year.cat.reorder_categories(['2017', '2018'], order = True)
 print(df.year.cat.categories)
 
-df_dummies = pd.get_dummies(df)
-
 # NaN, NA
 df.loc[pd.isnull(df.year)]
+df.isnull().sum()
 
-# fill NA
-df.dropna()
-df.reindex('year').ffill()    # forward-filling NA
-df['total_price'] = df.total_price.fillna(df.total_price.mean())
-
-from sklearn.preprocessing import Imputer
-imputer = Imputer(missing_values = 'NaN', strategy = 'median')
-imputer = imputer.fit(X[:, 1:3])
-X[:, 1:3] = imputer.transform(X[:, 1:3])
-print(X)
-
-# assert
 assert df.notnull.all()      # checking NA for each columns
 assert df.notnull.all().all()     # checking NA for entire DataFrame
 
 assert (df >= 0).all().all()     # asserting all values of df are greater than 0
 assert df.gender.dtypes == np.object
+
+# fill NA
+df.dropna()
+df.reindex('year').ffill()    # forward-filling NA
+df.total_price.fillna(-1, inplace = True)
+df['total_price'] = df.total_price.fillna(df.total_price.mean())
+
 
 ####################### dataframe with pandas #######################
 # cast()
@@ -544,7 +545,7 @@ df = pd.read_csv(url, ';')
 
 from urllib.request import urlopen, Request    # Get request from HTTP page
 url = 'http://www.datacamp.com/teach/documentation'
-# This packages he request
+# This packages the request
 request = Request(url)
 # send the request and catches the response
 response = urlopen(request)
