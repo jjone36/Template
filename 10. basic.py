@@ -1,5 +1,3 @@
-python -m pip install ipykernel
-python -m ipykernel install --user
 ####################### list method #######################
 areas = [11.25, 18.0, 20.0, 10.75, 9.50]
 print(areas.index(20.0))
@@ -178,8 +176,8 @@ df.year2 = df.year.cat.reorder_categories(['2017', '2018'], order = True)
 print(df.year.cat.categories)
 
 # NaN, NA
+nulls_per_column = df.isnull().sum()
 df.loc[pd.isnull(df.year)]
-df.isnull().sum()
 
 assert df.notnull.all()      # checking NA for each columns
 assert df.notnull.all().all()     # checking NA for entire DataFrame

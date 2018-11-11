@@ -133,6 +133,10 @@ item_pages = page.find_all('href')
 # 2nd page click
 driver.find_element_by_xpath('/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/button[3]').click()
 
+###########################################################
+####################### Regular expression #######################
+
+
 
 ###########################################################
 ####################### Text Mining #######################
@@ -162,5 +166,41 @@ for i in range(1000):
 # Create the bag of words model
 from sklearn.feature_extraction.text import CountVectorizer
 cv = CountVectorizer()
+cv = CountVectorizer(token_pattern, ngram_range = (1, 2))
 X = cv.fit_transform(corpus).toarray()     # making as a matrix
 y = dataset.iloc[:, 'target'].values
+
+
+############# TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf = TfidfVectorizer()
+csr_mat = tfidf.fit_transform(documents)
+print(csr_mat.toarray())
+# Get the words: words
+words = tfidf.get_feature_names()
+print(words)
+
+############# NMF (Non-negative Matrix Factorization)
+from sklearn.decomposition import NMF
+nmf = NFM(n_components = 10)
+nmf.fit(words)
+nmf_features = nmf.transform(words)
+# -> topics (similar NMF features, similar documents: cosine similarity)
+df = pd.DataFrame(nmf_features, index = titles)
+
+components_df = pd.DataFrame(nmf.components_, column = words)
+components_df.iloc[3, :].nlargest()
+
+# cosine similarity (-> recommendation)
+import pandas as pd
+from sklearn.preprocessing import normalize
+# Normalize the NMF features: norm_features
+norm_features = normalize(nmf_features)
+# Create a DataFrame: df
+df = pd.DataFrame(norm_features, index = titles)
+# Select the row corresponding to 'Cristiano Ronaldo': article
+article = df.loc['Cristiano Ronaldo']
+# Compute the dot products: similarities
+similarities = df.dot(article)
+# Display those with the largest cosine similarity
+print(similarities.nlargest())

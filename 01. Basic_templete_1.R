@@ -575,6 +575,9 @@ rect.hclust(tree = hc.div, k = 5)
 
 #####################################################
 ###### Model Evaluation ######
+library(caTools)
+colAUC(predicted_prob, actual, plotROC = TRUE)
+
 library(pROC)
 ROC = roc(actual, pred)
 plot(ROC, col = 'blue')

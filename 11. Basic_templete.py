@@ -19,18 +19,32 @@ imp = imp.fit(X[:, 1:3])
 X[:, 1:3] = imp.transform(X[:, 1:3])
 print(X)
 
+###### Encoding
+category_mask = df.dtypes == object
+df_category = df.columns[category_mask].tolist()
 # Encode categorical data
 X = pd.get_dummies(X)
 X = X.drop('columnName', axis = 1)
 X = pd.get_dummies(X, drop_first = True)
 
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+# convert categorical variables into integers
 labelencoder = LabelEncoder()
 X[:, 0] = labelencoder.fit_transform(X[:, 0])
 y = labelencoder.fit_transform(y)
-
-onehotencoder = OneHotEncoder(categorical_features = [0])
+# encode integer columns as dummies(One-Hot-Encode)
+onehotencoder = OneHotEncoder(categorical_features = [0], sparse = False)
 X = onehotencoder.fit_transform(X).toarray()
+
+from sklearn.feature_extraction import DictVectorizer    # -> encoding & OneHotEncoder in one go!
+# Convert df into a dictionary: df_dict
+df_dict = df.to_dict('records')
+# Create the DictVectorizer object: dv
+dv = DictVectorizer(sparse = False)
+print(dv.vocabulary_)
+# Apply dv on df: df_encoded
+df_encoded = dv.fit_transform(df_dict)
+
 
 # Split the dataset
 from sklearn.model_selection import train_test_split
@@ -42,8 +56,11 @@ X_scaled = scale(X)
 
 from sklearn.preprocessing import StandardScaler
 sc_X = StandardScaler()
-X_train = sc_X.fit_transform(X_train)
-X_test = sc_X.transform(X_tsst)
+X_train_scaled = sc_X.fit_transform(X_train)
+X_test_scaled = sc_X.transform(X_tsst)
+
+from sklearn.preprocessing import normalizer
+normalizer = normalizer(X)
 
 ###### Dimensionality Reduction
 # Pricipal Component Analysis
@@ -51,7 +68,16 @@ from sklearn.decomposition import PCA
 pca = PCA(n_components = 2)
 X_train = pca.fit_transform(X_train)
 X_test = pca.transform(X_test)
-explained_variance = pca.explained_variance_ratio_
+pca.components_
+pca.n_components_
+pca.mean_
+
+features = range(pca.n_components_)
+plt.bar(features, pca.explained_variance_)
+plt.xlabel('PCA feature')
+plt.ylabel('variance')
+plt.xticks(features)
+plt.show()
 
 # Kernel PCA (Non-liear data case)
 from sklearn.decomposition import kernelPCA
@@ -65,6 +91,14 @@ lda = LDA(n_components = 2)
 X_train = lda.fit_transform(X_train, y_train)    # LDA: supervised model
 X_test = lda.transform(X_test)
 
+# t-SNE => 2D
+from sklearn.manifold import TSNE
+model = TSNE(learning_rate = 200)
+tsne_features = model.fit_transform(samples)
+x = tsne_features[:, 0]
+y = tsne_features[:, 1]
+plt.scatter(x, y, c = label)
+plt.show()
 
 #################################################
 ###### Regression : Predicting a continuous number
@@ -90,13 +124,10 @@ np.sqrt(mean_squared_error(y_test, y_pred))
 
 ###### K-fold Cross Validaion
 from sklearn.model_selection import cross_val_score
-accuracies = cross_val_score(estimator = reg, X = X_train, y = y_train, cv = 10)
-accuracies.mean()    # mean accuracy value of validation sets
-accuracies.std()
-
-cv_score = cross_val_score(estimator = eg, X, y, cv = 5, scoring = 'roc_auc')
+cv_score = cross_val_score(estimator = reg, X, y, cv = 5, scoring = 'roc_auc')
 print(cv_score)
-
+cv_score.mean()    # mean accuracy value of validation sets
+cv_score.std()
 
 ############# 2) Regularized Regression #############
 ###### Elastic-Net
@@ -159,7 +190,7 @@ plt.show()
 
 ############# 2) Polynomial Regression #############
 from sklearn.preprocessing import PolynomialFeatures
-reg_poly = PolynomialFeatures(degree = 2)
+reg_poly = PolynomialFeatures(degree = 2, interaction_only = True, include_bias = False)
 X_poly = reg_poly.fit_transform(X_train)
 
 reg_poly_2 = LinearRegression()
@@ -169,13 +200,6 @@ y_pred = reg_poly_2.predict(X_test)
 plt.scatter(X_test, y_test, 'red')
 plt.plot(X_test, y_pred, 'blue')
 plt.show()
-
-############# 3) XGBoost #############
-'https://xgboost.readthedocs.io/en/latest/build.html#'
-from xgboost import XGBClassifier
-clas = XGBClassifier(max_depth = 5, learning_rate = .05, n_estimators = 300)
-clas.fit(X_train, y_train)
-y_pred = clas.predict(X_test)
 
 
 #################################################
@@ -195,13 +219,10 @@ from sklearn.metrics import roc_curve
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
 
 
-# StratifiedShuffleSplit
-
+# StratifiedShuffleSplit??
 # multiple class
 from sklearn.multiclass import OneVsRestClassifier
 clas = OneVsRestClassifier(LogisticRegression())
-
-
 
 
 ############# 2) Support Vector Machine #############
@@ -232,7 +253,8 @@ reg = DecisionTreeRegressor()
 reg.fit(X_train, y_train)
 
 from sklearn.tree import DecisionTreeClassifier
-clas = DecisionTreeClassifier(criterion = 'entropy')
+clas = DecisionTreeClassifier(criterion = 'entropy',
+                              max_depth = 4)
 clas.fit(X_train, y_train)
 
 
@@ -281,22 +303,85 @@ plt.show()
 # clustering
 clus = KMeans(n_clusters = 4, init = 'k-means++', max_iter = 300, n_init = 10)
 y_clus = clus.fit_predict(X)
+print(y_clus)
 
+centroids = clus.cluster_centers_
 
 ############# 2) Hierarchical Clustering #############
-from scipy.cluster.hierarchy as sch
+import scipy.cluster.hierarchy as sch
 # Dendrogam for the optimal number of clusters
-dendogram = sch.dendrogram(sch.Linkage(X, method = 'ward'))
+mergings = sch.Linkage(X_train_scaled, method = 'ward')     # dist()
+dendogram = sch.dendrogram(mergings, labels, leaf_rotation = 90, leaf_font_size = 5)    # hclust()
 plt.title('Dendrogram')
 plt.xlabel('Clusters')
 plt.ylabel('Euclidean distances')
 plt.show()
+
+labels = sch.fcluster(mergings, 15, criterion = 'distance')     # cutree()
 
 # Aggolomerative clustering
 from sklearn.cluster import AgglomerativeClustering
 clus = AgglomerativeClustering(n_clusters = 5, affinity = 'euclidean', linkage = 'ward')
 y_clus = clus.fit_predict(X)
 
+
+#################################################
+###### Ensemble Learning
+############# 1) XGBoost #############
+'https://xgboost.readthedocs.io/en/latest/build.html#'
+import xgboost as xgb
+## classification
+xg_claf = xgb.XGBClassifier(objective = 'binary:logistic',
+                            max_depth = 5,
+                            learning_rate = .05,
+                            n_estimators = 300)
+xg_claf.fit(X_train, y_train)
+y_pred = xg_claf.predict(X_test)
+
+## regression
+xg_reg = xgb.XGBRegressor(objective = 'reg:linear',
+                          booster = 'gbtree',
+                          max_depth = 5,
+                          early_stopping_rounds = 100,
+                          #learning_rate,
+                          #gamma,
+                          #alpha,
+                          #lambda,
+                          #subsample,
+                          #colsample_bytree)
+xg_reg.fit(X_train, y_train)
+
+## cross validation xgboost
+DM_train = xgb.DMatrix(data= X_train, label= y_train)
+DM_test = xgb.DMatrix(data= X_test, label= y_test)
+# Create the parameter dictionary: params
+myParam = {"objective" : "reg:logistic",
+          'booster' : 'gbtree'
+          "max_depth" : 3}
+# Create list of additional parameters and empty list
+reg_params = [1, 10, 100]
+best_rmse = []
+for reg in reg_params:
+    # Update l2 strength
+    myParam['lambda'] = reg
+    cv_results = xgb.cv(dtrain= DM_X, params= params, nfold= 3,
+                        num_boost_round= 100,
+                        metrics="rmse",    # mae, rmse, auc, error
+                        early_stopping_rounds = 100,
+                        as_pandas= True)
+     best_rmse.append(cv_results['test-rmse-mean'].tail().values[-1])
+results = pd.DataFrame(list(zip(reg_params, best_rmse)), columns=["lambda", "best_rmse"])
+
+## visualization
+# Plot the last tree sideways
+xgb.plot_tree(xg_reg, num_trees = 100, rankdir = 'LR')
+plt.show()
+
+xgb.plot_importance(xg_reg)
+plt.show()
+
+############# 2) CatBoosting #############
+############# 3) LightBoosting #############
 
 #################################################
 ###### Association Rule Learning
@@ -310,11 +395,15 @@ y_clus = clus.fit_predict(X)
 
 #################################################
 ############# Evaluation Metrics #############
+# Pearson correlation
+from scipy.stats import pearsonr
+correlation, pvalue = pearsonr(width, length)
 # R2
 reg.score(X_test, y_test)
 # RMSE
 from sklearn.metrics import mean_squared_error
 np.sqrt(mean_squared_error(y_test, y_pred))
+print("RMSE: %f" % (rmse))
 # confusion matrix
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
@@ -347,12 +436,17 @@ myParam = {'max_depth': [3, None], 'max_features': randint(1, 9), 'criterion': [
 myParam = {'n_neighbors': np.arange(1, 50)}
 # elastic net
 myParam = {'l1_ratio': np.linspace(0, 1, 30)}
+# xgboost
+myParam = {'learning_rate': [0.01, 0.05, 0.1, 0.5],
+           'n_estimators': [200],
+           'subsample': [.3, .5, .7]}
 
-cv = GridSearchCV(estimator = clas,
+cv = GridSearchCV(estimator = clas,  # reg
                   param_grid = myParam,
                   scoring = 'accuracy',
                   '''n_jobs = -1,'''
-                  cv = 10)
+                  cv = 10,
+                  verbose = 1)
 cv = cv.fit(X_train, y_train)
 
 best_score = cv.best_score_
@@ -360,11 +454,17 @@ print("Best score is {}".format(best_score))
 best_param = cv.best_params_
 print(best_param)
 
+
+############# Randomized Grid Search
 from sklearn.model_selection import RandomizedSearchCV
 cv = RandomizedSearchCV(estimator = clas,
-                        param_grid = myParam,
-                        cv = 5)
-
+                        param_distributions = myParam,
+                        scoring = 'roc_auc',
+                        cv = 5,
+                        n_iter = 5,
+                        verbose = 1)
+print(cv.best_score_)
+print(cv.best_params_)
 
 #################################################
 ############# Variable Selection functions #############
