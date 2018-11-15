@@ -134,9 +134,37 @@ item_pages = page.find_all('href')
 driver.find_element_by_xpath('/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/button[3]').click()
 
 ###########################################################
-####################### Regular expression #######################
+####################### String Manipulations #######################
+import re
 
+pattern = '\d{3}-\d{3}-\d{4}'
+# compile the pattern
+phone = re.compile(pattern)
+c1 = phone.match('010-123-4567')
+print(bool(c1))
 
+c2 = re.findall('\d+', 'the recipe calls for 10 strawberries and 1 banana')
+print(c2)
+
+# gsub()
+df['total_price_replaced'] = tips.total_price.apply(lambda x: x.replace('$', ''))
+# str_match()
+df['total_price_re'] = tips.total_price.apply(lambda x: re.findall('\d+\.\d+', x)[0])
+# str_trim()
+df.columns = df.columns.str.strip()
+# str_contains()
+df['Destination'].str.contains('DAL')
+df['name'].str.replace('Mr', 'Mrs')
+# tolower(), str_to_lower() / toupper()
+df.name = df.name.str.lower()
+df.name = df.name.str.upper()
+
+re.findall()
+re.search()
+re.match()
+re.sub(pattern, replacement, text)
+[re.sub(pattern, '', l) for l in lines]
+re.split()
 
 ###########################################################
 ####################### Text Mining #######################
@@ -204,3 +232,67 @@ article = df.loc['Cristiano Ronaldo']
 similarities = df.dot(article)
 # Display those with the largest cosine similarity
 print(similarities.nlargest())
+
+###########################################################
+####################### tokenization #######################
+from nltk.tokenize import sent_tokenize, word_tokenize
+from collections import Counter
+sentences = sent_tokenize(text)
+tokens = word_tokenize(text)
+# Convert the tokens into lowercase
+lower_tokens = [t.lower() for t in tokens]
+# Create the bag-of-words
+bow = Counter(lower_tokens)
+# Print the 10 most common tokens
+print(bow.most_common(10))
+
+
+from nltk.tokenize import TweetTokenizer, regexp_tokenize
+tknzr = TweetTokenizer()
+all_tokens = [tknzr.tokenize(t) for t in tweets]
+
+regexp_tokenize(textdata, pattern)
+tokenized_lines = [regexp_tokenize(s, '[#|@]\w+') for s in lines]
+line_nwords = [len(a) for a in tokenized_lines]
+plt.hist(line_nwords)
+plt.show()
+
+
+from nltk.stem import WordNetLemmatizer
+# Retain alphabetic words
+alpha_only = [t for t in lower_tokens if t.isalpha()]
+# Remove all stop words
+stops_removed = [t for t in alpha_only if t not in english_stops]
+# Lemmatize all tokens into a new list
+wordnet_lemmatizer = WordNetLemmatizer()
+lemmatized = [wordnet_lemmatizer.lemmatize(t) for t in stops_removed]
+bow = Counter(lemmatized)
+print(bow.most_common(10))
+
+
+from gensim.corpora.dictionary import Dictionary
+from nltk.tokenize import word_tokenize
+tokenized = [word_tokenize(t.lower()) for t in text]
+# Create a Dictionary from the articles
+dictionary = Dictionary(tokenized)
+dictionary.token2id
+computer_id = dictionary.token2id.get('computer')
+print(dictionary.get(computer_id))
+
+# Create a MmCorpus: corpus
+corpus = [dictionary.doc2bow(a) for a in tokenized]
+# Print the first 10 word ids with their frequency counts from the fifth document
+print(corpus[4][:10])
+
+
+############# TfidfVectorizer
+from gensim.models.tfidfmodel import TfidfModel
+tfidf = TfidfModel(corpus)
+# Calculate the tfidf weights of doc
+tfidf_weights = tfidf[doc]
+# Sort the weights from highest to lowest
+sorted_tfidf_weights = sorted(tfidf_weights, key = lambda w: w[1], reverse=True)
+for term_id, weight in sorted_tfidf_weights:
+    print(dictionary.get(term_id), weight)
+
+#############

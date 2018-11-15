@@ -143,6 +143,7 @@ plot(pca, type = 'l')
 
 pr.var = pca$sdev^2
 pve = pr.var / sum(pr.var)
+
 plot(pve, ylim = c(0, 1), type = 'b')   #scree plot
 plot(cumsum(pve), ylim = c(0, 1), type = 'b')
 

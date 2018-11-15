@@ -336,7 +336,7 @@ tweets_bing %>%
   spread(sentiment, avg_freq) %>%
   ungroup() %>%
   mutate(ratio = positive / negative, 
-         state = reorder(state, ratio)) %>%       # reorder()
+         state = reorder(state, ratio)) %>%    
   ggplot(aes(x = state, y = ratio)) + geom_point() + coord_flip()
 
 

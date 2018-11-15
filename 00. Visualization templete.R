@@ -335,6 +335,7 @@ ggplot(test_data, aes(x = norm)) +
   geom_density(col = 'red') +
   stat_function(fun = dnorm, args = list(mean = mean(test_data$norm), sd = sd(test_data$norm)), col = 'blue') +
   theme_classic()
+
 #################################### ggplot2 part3 ####
 pairs(iris[1:4])
 
