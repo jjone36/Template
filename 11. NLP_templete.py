@@ -1,4 +1,12 @@
 ###########################################################
+# install
+'C:\Users\jjone\Anaconda3\Scripts'
+pip install selenium
+Chrome Driver download
+'https://sites.google.com/a/chromium.org/chromedriver/'
+
+'https://blog.michaelyin.info/how-crawl-infinite-scrolling-pages-using-python/'
+
 ####################### Web Scraping #######################
 import requests
 from bs4 import BeautifulSoup
@@ -52,14 +60,8 @@ for ticker in tickers:
 
 
 ############ Selenium
-# install
-'https://sites.google.com/a/chromium.org/chromedriver/'
-get pip.py install
-pip install selenium
-Chrome Driver download
-
 from selenium import webdriver
-chrome_path
+chrome_path =  "C:\\Users\jjone\Downloads\chromedriver"
 driver = webdriver.Chrome(executable_path = chrome_path)
 driver.implicitly_wait(10)
 
@@ -69,10 +71,13 @@ driver.get(url)
 
 # scraping elements
 # find_elements_by_(id, name, xpath, link_text, partial_link_text, tag_name, class_name, css_selector)
-element = driver.find_elements_by_class_name(css)
 element = driver.find_elements_by_link_text('Download')
-element.click()
 element.text
+element.click()
+subpageURL = element.get_attribute('href')
+
+
+element = driver.find_elements_by_class_name(css)
 subpageURL = element.get_attribute('href')
 subpageURL = element.find_all('href')
 
@@ -95,8 +100,8 @@ from selenium.common.exceptions import TimeoutException
 url = ''
 xpath = ''
 def init_driver():
-    driver = webdriver.Chrome(executable_path = '/Users/...')
-    driver.wait = WebDriverWait(driver, 5)
+    driver = webdriver.Chrome(executable_path = chrome_path)
+    driver.wait = WebDriverWait(10, driver)
     return driver
 
 def get_data(driver):
@@ -113,6 +118,7 @@ chrome_path
 driver = webdriver.Chrome(executable_path = chrome_path)
 driver.implicitly_wait(30)
 
+## sephora review
 url = 'https://www.sephora.com/product/c-firma-day-serum-P400259?icid2=products%20grid:p400259:product'
 driver.get(url)
 reviews = driver.find_elements_by_class_name('css-eq4i08')
@@ -124,6 +130,7 @@ reviews = reviews.append(reviews2)
 for review in reviews:
     print(review.text)
 
+
 type = ['skin-care-solutions']
 url = 'https://www.sephora.com/shop/' + type + '?pageSize=300'
 driver.get(url)
@@ -134,14 +141,17 @@ item_pages = page.find_all('href')
 driver.find_element_by_xpath('/html/body/div[1]/div[2]/div/div/div/div/div[2]/div[2]/div[2]/div/div[2]/div[2]/div/button[3]').click()
 
 ###########################################################
+'https://regex101.com/#python'
 ####################### String Manipulations #######################
 import re
 
-pattern = '\d{3}-\d{3}-\d{4}'
-# compile the pattern
-phone = re.compile(pattern)
-c1 = phone.match('010-123-4567')
-print(bool(c1))
+sentence = 'My phone number is 425-125-9535'
+pattern = r'(\d{3})-(\d{3}-\d{4})'
+phone_Regex = re.compile(pattern)
+c1 = phone_Regex.search(sentence)
+c1.group()
+c1.group(1)
+c1.group(2)
 
 c2 = re.findall('\d+', 'the recipe calls for 10 strawberries and 1 banana')
 print(c2)
@@ -159,9 +169,9 @@ df['name'].str.replace('Mr', 'Mrs')
 df.name = df.name.str.lower()
 df.name = df.name.str.upper()
 
-re.findall()
 re.search()
 re.match()
+re.findall()
 re.sub(pattern, replacement, text)
 [re.sub(pattern, '', l) for l in lines]
 re.split()

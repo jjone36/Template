@@ -80,7 +80,7 @@ dr =  [True, False, False, False, True, True, True]
 cpc = [809, 731, 588, 18, 200, 70, 45]
 
 my_dict = {'country' : names, 'drives_right' : dr, 'cars_per_cap' : cpc}  # Dictionary
-cars = pd.DataFrame(my_dict))  # DataFrame
+cars = pd.DataFrame(my_dict)  # DataFrame
 
 # gives row names (row labels) to the DataFrame
 row_labels = ['US', 'AUS', 'JAP', 'IN', 'RU', 'MOR', 'EG']

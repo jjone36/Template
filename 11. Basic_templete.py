@@ -386,11 +386,21 @@ plt.show()
 #################################################
 ###### Association Rule Learning
 ############# Apriori #############
+dataset = pd.read_csv('Basket.csv', header = None)
+
+# transforming each transaction into lists
+transactions = []
+for i in range(0, len(dataset)+1):
+    transactions.append([str(dataset.values[i, :])])
+
+from apyroi import apriori
+rules = apriori(transactions, min_support, min_confidence, min_lift, min_length = 5)
+results = list(rules)
 
 
 
 
-
+############# recommendation #############
 
 
 #################################################

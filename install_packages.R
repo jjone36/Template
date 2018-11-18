@@ -1,23 +1,18 @@
 install.packages("tidyverse")
 install.packages("magrittr")
 
-install.packages("ggthemes")
-install.packages("rebus")
-install.packages("broom")
-install.packages("scales")
-install.packages("plyr")
-
 install.packages("httr")
 install.packages("xml2")
 install.packages("rvest")
 install.packages("jsonlite")
 install.packages("stringr")
 install.packages("tm")
+install.packages("rebus")
 install.packages("tidytext")
 install.packages("wordcloud")
 install.packages("wordcloud2")
 install.packages("RColorBrewer")
-
+install.packages("ggthemes")
 
 install.packages("plotrix")
 install.packages("caret")
@@ -28,10 +23,14 @@ install.packages("randomForest")
 install.packages("e1071")
 install.packages("xgboost")
 install.packages("caTools")
+install.packages('gridExtra')
+install.packages('corrplot')
+
+install.packages("broom")
+install.packages("scales")
+install.packages("plyr")
 
 
-install.packages(gridExtra)
-library(corrplot)
 library(Metrics)
 library(pROC)
 library(MASS)

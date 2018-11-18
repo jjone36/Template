@@ -1,5 +1,7 @@
 ####################### Importing Data #######################
 ############# text
+
+
 file = open('moby_dick.txt', mode = 'r')
 print(file.read())
 # Read & print the first 2 lines
@@ -25,30 +27,28 @@ xl = pd.ExcelFile(file)
 print(xl.sheet_names)
 df = xl.parse(1, parse_cols= [0, 3], skiprows= [0], names= ['Country', 'AAM due to War (2002)'])
 
+
 ############# SQL
 from sqlalchemy import create_engine
 import pandas as pd
-# Create engine: engine
+
 engine = create_engine('sqlite:///Datacamp.sqlite')
-# Save the table names to a list: table_names
 table_names = engine.table_names()
 print(table_names)
 
-# Open engine connection: con
 con = engine.connect()
 rs = con.execute('SELECT * FROM Album')
+con.close()
 
+# fetchall()
 df = pd.DataFrame(rs.fetchall())
 print(df.head())
 
+# fetchmany()
 with engine.connect() as con:
     rs = con.execute('SELECT LastName, Title FROM Employee')
     df = pd.DataFrame(rs.fetchmany(3))
     df.columns = rs.keys()
-# Print the length of the DataFrame df
-print(len(df))
-# Close connection
-con.close()
 
 # One line!
 df = pd.read_sql_query('SELECT LastName, Title FROM Employee', engine)

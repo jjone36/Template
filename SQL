@@ -1,0 +1,200 @@
+Entity Relationship Diagram
+########################### Basic ###########################
+SELECT names
+FROM accounts
+WHERE name LIKE 'c%'   ## '%one%', '%s'
+
+SELECT names
+FROM accounts
+WHERE names IN ('Walmart', 'Apple')
+
+SELECT names
+FROM accounts
+WHERE names NOT IN ('Walmart'),
+      names NOT LIKE '%google%'
+
+SELECT *
+FROM orders
+WHERE standart_qty > 1000 AND poster_qty = 0;
+
+SELECT name
+FROM accounts
+WHERE name NOT LIKE 'C%' AND name LIKE '%s'
+
+SELECT *
+FROM web_events
+WHERE channel IN ('organic', 'adwords') OR occurred_at BETWEEN '2016-01-01' AND '2017-01-01'
+ORDER BY occurred_at DESC;
+
+########################### join_ ###########################
+SELECT orders.*, accounts.*
+FROM accounts
+JOIN orders
+ON accounts.id = orders.account_id;
+
+SELECT w.account_id, w.occurred_at, w.channel, a.name
+FROM web_events w
+JOIN accounts a
+ON w.account_id = a.id
+WHERE a.name = 'Walmart';
+
+SELECT r.name, s.name, a.name
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+JOIN accounts a
+ON s.id = a.sales_rep_id
+ORDER BY a.name;
+
+SELECT r.name, s.name, a.name
+FROM sales_reps s
+JOIN region r
+ON r.id = s.region_id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+WHERE a.name LIKE 's%' AND r.name = 'Midwest'
+ORDER BY a.name;
+
+SELECT o.name region, a.name account, o.total_amt_usd/(a.total + .01) unit price
+FROM order o
+JOIN accounts a
+ON a.id = o.account_id
+JOIN sales_reps s
+ON o.sales_rep_id = s.id
+JOIN region r
+ON r.id = s.region_id
+WHERE o.standart_qty > 100 AND poster_qty > 50
+ORDER BY unit price;
+
+SELECT DISTINCT w.channel, a.name
+FROM web_events w
+JOIN account a
+ON w.account_id = a.id
+WHERE w.account_id = '1001';
+
+########################### aggregation ###########################
+SELECT SUM(poster_qty) AS total_poster_sales
+FROM orders;
+
+SELECT MIN(occurred_at)
+FROM orders;
+
+SELECT a.name, SUM(total_amt_usd) total_sales
+FROM orders o
+JOIN accounts a
+ON a.id = o.account_id
+GROUP BY a.name;
+
+SELECT w.channel, count(*)
+FROM web_events w
+GROUP BY w.channel;
+
+SELECT a.name, AVG(standard_qty) avg_standard_qty, AVG(gloss_qty) avg_gloss_qty, AVG(poster_qty)
+FROM order o
+JOIN accounts a
+ON a.name = o.account_id
+GROUP BY a.name;
+
+SELECT s.name, w.channel, SUM(*) num_events
+FROM web_events w
+JOIN accounts a
+ON a.id = w.account_id
+JOIN sales_reps s
+ON s.account_id = a.id
+GROUP BY s.name, w.channel;
+
+
+
+####################### SQL with python #######################
+from sqlalchemy import create_engine
+import pandas as pd
+
+engine = create_engine('sqlite:///Datacamp.sqlite')
+table_names = engine.table_names()
+print(table_names)
+
+con = engine.connect()
+rs = con.execute('SELECT * FROM Album')
+con.close()
+
+# fetchall()
+df = pd.DataFrame(rs.fetchall())
+print(df.head())
+
+# fetchmany()
+with engine.connect() as con:
+    rs = con.execute('SELECT LastName, Title FROM Employee')
+    df = pd.DataFrame(rs.fetchmany(3))
+    df.columns = rs.keys()
+
+# One line!
+df = pd.read_sql_query('SELECT LastName, Title FROM Employee', engine)
+
+############# statement
+from sqlalchemy import select
+print(engine.table_names())
+
+# Reflect census table via engine: census
+census = Table('census', metadata, autoload = True, autoload_with = engine)
+
+# filtering: WHERE
+stmt = select([census])
+stmt = stmt.where(census.columns.state.in_(OECD))
+print(stmt)
+
+for result in con.execute(stmt):
+    print(result.age, result.gender)
+
+results = con.execute(stmt).fetchall()
+for result in results:
+    print(result.age, result.gender, result.state)
+
+# filtering: and_, or_
+from sqlalchemy import and_, or_
+stmt = select([census]).where(
+  and_(census.columns.state == 'New York',
+       or_(census.columns.age == 21, census.columns.age == 37))
+  )
+
+# ordering
+from sqlalchemy import desc
+stmt = select([census.columns.state, census.columns.age])
+stmt = stmt.order_by('state', desc('age'))
+
+# as
+stmt = select((census.columns.pop_2008 - census.columns.pop_2000).label('pop_diff'))
+
+# aggregating: sum, count, distinct
+from sqlalchemy import func
+stmt = select([func.sum(census.columns.age)])
+stmt = select([func.count(census.columns.state.distinct()])
+n_distinct_state = con.execute(stmt).scalar()
+
+# grouping
+stmt = select([census.columns.state, func.count(census.columns.age)])
+stmt = stmt.group_by('state')
+
+age_sum = func.sum(census.columns.age).label('age_sum')
+stmt = select([census.columns.state, age_sum]).group_by('state')
+
+result = con.execute(stmt).fetchall()
+print(result[:20])
+
+import pandas as pd
+df = pd.DataFrame(result)
+df.columns = result[0].keys()
+
+# joining
+stmt = select([census, account])
+stmt = stmt.select_from(
+         census.join(account, census.columns.state == account.columns.name))
+
+# updating
+stmt = select([census]).where(census.columns.state == 'New York')
+
+stmt2 = update(census).values(census.columns.age == 30).where(census.columns.state == 'New York')
+result = con.execute(stmt2)
+print(result.rowcount)
+
+# deleting
+stmt_del = delect(census).where(census.colums.age >= 80)
