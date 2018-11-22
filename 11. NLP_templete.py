@@ -197,7 +197,7 @@ for i in range(1000):
     text = text.lower()
     text = text.split()
     ps = PorterStemmer()
-    text = [ps.stem(word) for word in text if not word in set(stopwords.words('english'))]
+    text = [ps.stem(t) for t in text if not t in set(stopwords.words('english'))]
     text = ' '.join(text)
     corpus.append(text)
 
@@ -306,3 +306,13 @@ for term_id, weight in sorted_tfidf_weights:
     print(dictionary.get(term_id), weight)
 
 #############
+
+
+############# pos_tag
+import nltk
+nltk.pos_tag('What is machine learning?'.split())
+
+sen = 'Hugh Michael Jackman is an Australian actor, singer, and producer.'
+tags = nltk.pos_tag(sen.split())
+nltk.ne_chunk(tags)
+nltk.ne_chunk(tags).draw()

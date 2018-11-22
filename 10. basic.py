@@ -46,7 +46,7 @@ captials = ['madrid', 'paris', 'berlin', 'olso']
 ind_ger = countries.index('germnany')
 print(captials[ind_ger])
 
-europe = {'spain': 'madrid', 'france':'paris', 'germany':'berlin', 'norway':'oslo'}  # Dictionary
+europe = {'spain': 'madrid', 'france': 'paris', 'germany': 'berlin', 'norway': 'oslo'}  # Dictionary
 
 print(europe.items())
 print(europe.keys())
@@ -60,7 +60,7 @@ print(europe['france'])
 print('italy' in europe)    # -> True
 
 # Dictionary in the Dictionary
-europe = {'spain' : { 'capital': 'madrid', 'population': 46.77 },
+europe = {'spain' : { 'capital':'madrid', 'population': 46.77 },
           'france' : { 'capital':'paris', 'population': 66.03 },
           'germany': { 'capital':'berlin', 'population': 80.62 },
           'norway': { 'capital':'oslo', 'population': 5.084 }}

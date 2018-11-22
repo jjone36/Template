@@ -1,6 +1,8 @@
 'https://scikit-learn.org/stable/index.html'
 'https://campus.datacamp.com/courses/machine-learning-with-the-experts-school-budgets'
 #################################################
+cd C:\Users\jjone\Anaconda3\Scripts
+pip3 install ~~~
 ############# Data Preprocessing #############
 import pandas as pd
 import numpy as np
@@ -32,6 +34,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 labelencoder = LabelEncoder()
 X[:, 0] = labelencoder.fit_transform(X[:, 0])
 y = labelencoder.fit_transform(y)
+
 # encode integer columns as dummies(One-Hot-Encode)
 onehotencoder = OneHotEncoder(categorical_features = [0], sparse = False)
 X = onehotencoder.fit_transform(X).toarray()
@@ -224,13 +227,11 @@ fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
 from sklearn.multiclass import OneVsRestClassifier
 clas = OneVsRestClassifier(LogisticRegression())
 
-
 ############# 2) Support Vector Machine #############
 from sklearn.svm import SVR
 reg = SVR(kernel = 'rbf')     # non-linear SVM
 reg.fit(X_train, y_train)
 y_pred = reg.predict(X_test)
-
 
 from sklearn.svm import SVC
 clas = SVC(kernel = 'linear')
@@ -240,12 +241,14 @@ clas.fit(X_train, y_train)
 # Predict and print the label for the new data point X_new
 y_pred = clas.predict(X_test)
 
-
 ############# 3) Naive Bayes Classification #############
 from sklearn.naive_bayes import GaussianNB
 clas = GaussianNB()
 clas.fit(X_train, y_train)
 
+from sklearn.naive_bayes import MultinomialNB
+clas = MultinomialNB()
+clas.fit(X_train, y_train)
 
 ############# 4) Decision Tree #############
 from sklearn.tree import DecisionTreeRegressor

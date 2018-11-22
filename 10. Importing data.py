@@ -1,7 +1,5 @@
 ####################### Importing Data #######################
 ############# text
-
-
 file = open('moby_dick.txt', mode = 'r')
 print(file.read())
 # Read & print the first 2 lines
