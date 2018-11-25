@@ -30,7 +30,6 @@ X = X.drop('columnName', axis = 1)
 X = pd.get_dummies(X, drop_first = True)
 
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-# convert categorical variables into integers
 labelencoder = LabelEncoder()
 X[:, 0] = labelencoder.fit_transform(X[:, 0])
 y = labelencoder.fit_transform(y)
@@ -39,7 +38,8 @@ y = labelencoder.fit_transform(y)
 onehotencoder = OneHotEncoder(categorical_features = [0], sparse = False)
 X = onehotencoder.fit_transform(X).toarray()
 
-from sklearn.feature_extraction import DictVectorizer    # -> encoding & OneHotEncoder in one go!
+# -> encoding & OneHotEncoder in one go
+from sklearn.feature_extraction import DictVectorizer
 # Convert df into a dictionary: df_dict
 df_dict = df.to_dict('records')
 # Create the DictVectorizer object: dv
@@ -47,7 +47,6 @@ dv = DictVectorizer(sparse = False)
 print(dv.vocabulary_)
 # Apply dv on df: df_encoded
 df_encoded = dv.fit_transform(df_dict)
-
 
 # Split the dataset
 from sklearn.model_selection import train_test_split
@@ -250,6 +249,8 @@ from sklearn.naive_bayes import MultinomialNB
 clas = MultinomialNB()
 clas.fit(X_train, y_train)
 
+clas.classes_
+
 ############# 4) Decision Tree #############
 from sklearn.tree import DecisionTreeRegressor
 reg = DecisionTreeRegressor()
@@ -297,7 +298,7 @@ for i in range(1, 11):
     kmeans.fit(X)
     wcss.append(kmeans.inertia_)
 
-plt.plot(range(1:11), wcss)
+plt.plot(range(1, 11), wcss)
 plt.title('The Elbow Method')
 plt.xlabel('The Number of clusters')
 plt.ylabel('WCSS')
@@ -387,22 +388,6 @@ plt.show()
 ############# 3) LightBoosting #############
 
 #################################################
-###### Association Rule Learning
-############# Apriori #############
-dataset = pd.read_csv('Basket.csv', header = None)
-
-# transforming each transaction into lists
-transactions = []
-for i in range(0, len(dataset)+1):
-    transactions.append([str(dataset.values[i, :])])
-
-from apyroi import apriori
-rules = apriori(transactions, min_support, min_confidence, min_lift, min_length = 5)
-results = list(rules)
-
-
-
-
 ############# recommendation #############
 
 
@@ -412,15 +397,17 @@ results = list(rules)
 from scipy.stats import pearsonr
 correlation, pvalue = pearsonr(width, length)
 # R2
-reg.score(X_test, y_test)
+r2 = reg.score(X_test, y_test)
+print("R-squred score: %f" % (r2))
 # RMSE
 from sklearn.metrics import mean_squared_error
 np.sqrt(mean_squared_error(y_test, y_pred))
-print("RMSE: %f" % (rmse))
+# accuracy
+metrics.accuracy_score(y_test, y_pred)
 # confusion matrix
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
-cm = confusion_matrix(y_test, y_pred)
+cm = confusion_matrix(y_test, y_pred, label = ['Spam', 'NoSpam'])
 classification_report(y_test, y_pred)
 # ROC
 from sklearn.metrics import roc_curve, roc_auc_score

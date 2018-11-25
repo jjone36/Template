@@ -135,12 +135,9 @@ pca2 = preProcess(x = training[, -ncol(training)], method = 'pca', pcaComp = 2)
 summary(pca)
 
 training_pca = predict(pca, training)
-training_pca = training_pca[, c(2, 3, 1)]
 testing_pca = predict(pca, testing)
-testing_pca = testing_pca[, c(2, 3, 1)]
 
 plot(pca, type = 'l')
-
 pr.var = pca$sdev^2
 pve = pr.var / sum(pr.var)
 
@@ -158,15 +155,6 @@ ggplot(df_pca, aes(x = PC1, y = PC2, col = dataset$diagnosis)) +
 library(ggord)
 ggord(pca, grp_in = dataset$diagnosis)
 
-
-## 2) Linear Discriminant Analysis : Supervised
-library(MASS)
-lda = lda(Customer_Segment ~., data = training)
-
-training_lda = predict(lda, training) %>% as.data.frame()
-training_lda = training_lda[, c(5, 6, 1)]
-testing_lda = predict(lda, testing) %>% as.data.frame()
-testing_lda = testing_lda[, c(5, 6, 1)]
 
 ## 3) Kernel PCA (Non-liear data case)
 library(kernlab)

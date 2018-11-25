@@ -73,19 +73,19 @@ for i in range(len(df)):
     text = re.sub('[^a-zA-Z]', ' ', df['Text'][i])
     text = text.lower()
     tokens = word_tokenize(text)
-    tokens = [t for t in tokens if len(t) > 2]   
-    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming 
+    tokens = [t for t in tokens if len(t) > 2]
+    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming
     tokens = [t for t in tokens if t not in set(stopwords.words('english'))]
     tokens = ' '.join(tokens)
     corpus.append(tokens)
-    
+
 ##########################
 def my_tokenizer(x):
     text = re.sub('[^a-zA-Z]', ' ', x)
     text = text.lower()
     tokens = word_tokenize(text)
-    tokens = [t for t in tokens if len(t) > 2]   
-    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming 
+    tokens = [t for t in tokens if len(t) > 2]
+    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming
     tokens = [t for t in tokens if t not in set(stopwords.words('english'))]
     return tokens
 
@@ -107,14 +107,14 @@ word_index_map['advertising']
 def tokens_to_vector(tokens):
     # initialize empty array
     x = np.zeros(len(word_index_map))
-    # vectorize 
+    # vectorize
     for token in tokens:
         i = word_index_map[token]
         x[i] += 1
-    x = x / x.sum()    
-    return x 
+    x = x / x.sum()
+    return x
 
-#####################################################################            
+#####################################################################
 titles = [line.rstrip() for line in open('all_book_titles.txt')]
 
 import re
@@ -124,11 +124,11 @@ wordnet_lemmatizer = WordNetLemmatizer()
 
 ############# tokenizer funtion
 def my_tokenizer(x):
-    text = re.sub('[^a-zA-Z]', ' ', x)     # alpha only 
+    text = re.sub('[^a-zA-Z]', ' ', x)     # alpha only
     text = text.lower()
     tokens = word_tokenize(text)
-    tokens = [t for t in tokens if len(t) > 2]   
-    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming 
+    tokens = [t for t in tokens if len(t) > 2]
+    tokens = [wordnet_lemmatizer.lemmatize(t) for t in tokens]    # stemming
     tokens = [t for t in tokens if t not in set(stopwords.words('english'))]
     return tokens
 
@@ -144,7 +144,6 @@ for title in titles:
     try:
         title = title.encode('ascii', 'ignore').decode('utf-8')
         all_titles.append(title)
-        
         # tokenization
         tokens = my_tokenizer(title)
         corpus.append(tokens)
@@ -153,18 +152,17 @@ for title in titles:
             if token not in word_index_map:
                 word_index_map[token] = current_index
                 current_index += 1
-                index_word_map.append(token)   
+                index_word_map.append(token)
     except Exception as e:
         print(e)
         print(title)
         error_count += 1
-    
+
 index_word_map[426]
 word_index_map['access']
 
+############# vectorizeing
 import numpy as np
-
-############# vectorizeing 
 N = len(corpus)
 D = len(word_index_map)
 X = np.zeros((D, N))
@@ -174,11 +172,11 @@ i = 0
 def tokens_to_vector(tokens):
     # initialize empty array
     x = np.zeros(len(word_index_map))
-    # vectorize 
+    # vectorize
     for token in tokens:
         i = word_index_map[token]
-        x[i] = 1 
-    return x 
+        x[i] = 1
+    return x
 
 for tokens in corpus:
     X[:, i] = tokens_to_vector(tokens)
@@ -194,9 +192,3 @@ plt.scatter(Z[:, 0], Z[:, 1])
 for i in range(D):
     plt.annotate(s = index_word_map[i], xy = (Z[i, 0], Z[i, 1]))
 plt.show()
-
-
-        
-        
-
-

@@ -1,3 +1,4 @@
+http://www.colors.commutercreative.com/grid/
 ####################### Visualization #######################
 import matplotlib.pyplot as plt
 
@@ -21,27 +22,53 @@ plt.axes([x_lo, y_lo, width, height], 'equal')
 plt.show()
 plt.clf()
 
-# facet_grid()
+# subplots()
 cols = ['weight', 'mpg']
 df[cols].plot(kind = 'box', subplots = True)
 
-fig, (ax1, ax2) = plt.subplots(2, 1)
+fig, (ax1, ax2) = plt.subplots(nrows = 2, ncols = 1, sharey = True)
 ax1.hist(df['weight'], normed = True, bins = 30, range = (0, .3))
+ax.axvline(x= np.median(df['weight']), color='m', label='Median', linestyle='--', linewidth=2)
+
 ax2.scatter(df['weight'], df['mpg'])
+ax2.set(xlabel = 'weight of auto', xlim = (10, 100), title = 'Scatter Plot')
+
 plt.tight_layout()
 plt.show()
 
-'https://campus.datacamp.com/courses/python-for-r-users/plotting-4?ex=7'
-facet = sns.FacetGrid(df, col, row)
-facet.map(plt.scatter, col_x, col_y)
-plt.show()
-
-# position : 1. 9. 2 / 6. 10. 7 / 3. 8. 4 / 0. 5
+## position : 1. 9. 2 / 6. 10. 7 / 3. 8. 4 / 0. 5
 plt.subplots(2, 2, 2)
 plt.plot(year, computer_science, color = 'red', legend = 'Computer Science')
 plt.subplots(2, 2, 1)
 plt.plot(year, physical_sciences, color = 'blue', legend = 'Physical Sciences')
 plt.legend(loc = 'lower center')
+
+# FacetGrid
+f = sns.FacetGrid(df, row = 'smoker', col = 'diagnose', hue = 'gender')
+f.map(plt.scatter, 'weight', 'age')
+plt.show()
+
+f = sns.FacetGrid(iris, row = 'species', row_order = ['Setosa', 'versicolor', 'Virginica'])
+f.map(plt.scatter, 'Sepal Length')
+plt.show()
+
+sns.factorplot(kind = 'box', data = iris, x = 'Sepal Length', row = 'Degree_Type')
+
+# PairGrid
+p = sns.PairGrid(iris, vars = ['Sepal Length', 'Petal Length'])
+p.map(plt.scatter)
+p.map_diag()
+p.map_offdiag()
+
+# PairPlot: ggpairs()
+sns.pairplot(df, vars = [], palette = 'husl', plot_kws = {'alpha': .5})
+sns.pairplot(df, x_vars, y_vars, hue = 'origin', kind = 'reg', diag_kind = 'kde')   # diag_kws
+
+# JointGrid: joint distributions
+sns.jointplot(x = 'hp', y = 'mpg', data = auto, kind = 'scatter')     # 'scatter', 'reg', 'resid', 'kde', 'hex'
+
+j = sns.JointGrid(x = 'hp', y = 'mpg', data = auto, xlim = (.1, 1))
+j.plot(sns.regplot, sns.distplot)
 
 # plt.annotate
 cs_max = computer_science.max()
@@ -57,7 +84,6 @@ plt.style.use('ggplot')
 plt.savefig('plot1.png')
 
 #####################################################################
-####################### boxplot #######################
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -67,9 +93,9 @@ df.plot(x, y, kind = 'scatter')
 df.scatter(x, y)
 
 plt.scatter(df['x'], df['y'])
-
-sns.lmplot(x, y, data, fit_reg = False)
 sns.regplot(x, y, data, scatter = None, label = 'Order 1')
+sns.regplot(x, y, data, fit_reg = False, x_bins = 10)
+sns.lmplot(x, y, data, fit_reg = False)
 
 # geom_baxplot()
 df.boxplot(column, by)
@@ -77,30 +103,41 @@ sns.boxplot(x, y, data)
 
 # geom_hist()
 plt.hist(df['x'])
-sns.distplot(x)
+df['x'].plot.hist()
+sns.distplot(df['x'], kde = False, bins = 30)
 
 # geom_bar()
-sns.countplot(x, data)
+sns.countplot(data = df, y = 'weight')
 sns.barplot(x, y, data)
 
 plt.show()
+plt.clf()
 
-####################### Seaborn #######################
+####################### Seaborn special #######################
 # set default Seaborn style
 sns.set()
+sns.set_style('whitegird')   # dark, white
+sns.despine()    # removing the outside lines
+sns.set_palette('colorblind')   # bright
+
+sns.palplot(sns.color_palette("Purples", 8))   # husl
 
 # geom_point()
-sns.lmplot(x = 'weight', y = 'mpg', data = auto, col = 'cyl')
 plt.scatter(auto['weight'], auto['mpg'], color = 'red', label = 'data')
 sns.regplot(x = 'weight', y = 'mpg', data = auto, color = 'blue', scatter = None, label = 'Order 1')
+sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'cyl')
+
 # geom_smooth(method = 'lm', se = F)
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, col = 'cyl')
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, hue = 'origin', palette = 'Set1')
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'origin')      # row-wise grouping
+
 # sns.regplot(order = 2) -> polynomial regreesion
-sns.regplot(x = 'weight', y = 'mpg', data = auto, color = 'green', scatter = None, order = 2, label = 'Order 2')
+sns.regplot(x = 'weight', y = 'mpg', data = auto, color = 'green', order = 2, label = 'Order 2')
 plt.legend(loc = 'upper right')
 plt.show()
+
+sns.regplot(x = 'weight', y = 'mpg', data = auto, order = 3, x_estimator = np.mean)
 
 # residaul plot
 sns.residplot(x = 'weight', y = 'mpg', data = auto, color = 'indianred')
@@ -108,19 +145,148 @@ sns.residplot(x = 'weight', y = 'mpg', data = auto, color = 'indianred')
 sns.stripplot(x = 'cyl', y = 'hp', data = auto, size = 3, jitter = True)
 # swarm plot
 sns.swarmplot(x = 'hp', y = 'cyl', data = auto, hue = 'origin', orient = 'h')
-sns.boxplot()
 
 # violin plot / + geom_boxplot(varwidth = T)
-sns.violinplot(x = 'cyl', y = 'hp', data = auto)
-sns.violinplot(x = 'cyl', y = 'hp', data = auto, inner = None, color = 'lightgray')
+sns.violinplot(x = 'cyl', y = 'hp', data = auto, color = 'lightgray')
+sns.violinplot(x = 'cyl', y = 'hp', data = auto, inner = None,  palette = 'husl')
 
-# joint distributions
-sns.jointplot(x = 'hp', y = 'mpg', data = auto, kind = 'scatter')     # 'scatter', 'reg', 'resid', 'kde', 'hex'
-# ggpairs()
-sns.pairplot(auto)
-sns.pairplot(auto, hue = 'origin', kind = 'reg')
 # covariance matrix plot (heatmap)
-sns.heatmap(cov_matrix)
+sns.heatmap(df.corr())
+
+df_crosstab = pd.corsstab(df['weight'], df['height'], values = df['hp'], aggfunc = 'mean'))
+sns.heatmap(df_crosstab, annot = True, fmt = 'd', cmap = 'YlGnBu', cbar = False,
+            linewidths = .3, center = df_crosstab.loc = [6, 9])
+
+#####################################################################
+http://bokeh.github.io
+####################### Bokeh #######################
+from bokeh.plotting import figure
+from bokeh.io import output_file, show
+
+p = figure(x_axis_label = 'weight', y_axis_label = 'mpg',
+           plot_height = 400, plot_width = 700, x_range, y_range)
+p.circle(auto['weight'], auto['mpg'], color = 'blue', size = 10, alpha = .8)
+p.circle(auto['height'], auto['mpg'], color = 'red', size = 10, alpha = .8)
+output_file('auto.html')
+show(p)
+
+from bokeh.plotting import ColumnDataSource
+source = ColumnDataSource(df)
+
+# selection
+p = figure(x_axis_type = 'datetime', tools = 'box_select, lasso_select')
+p.circle(x = 'Year', y = 'Time', source = source, selection_color = 'blue', nonselection_alpha = .1)
+output_file('auto_1.html')
+show(p)
+
+# HavorTool
+from bokeh.models import HoverTool
+hover = HoverTool(tooltips = None, mode = 'hline' # 'vline')
+
+p = figure()
+p.circle(x, y, fill_color = 'grey', line_color = None,
+         hover_fill_color = 'firebrick', hover_line_color = 'grey', hover_alpha = .5)
+p.add_tools(hover)
+
+hover2 = HoverTool(tooltips = [('species name', '@species'),
+                               ('petal length', '@petal_length')])
+p = figure(tools = [hover, 'pan', 'wheel_zoom'])
+
+
+# Colormapping
+from bokeh.models import CategoricalColorMapper
+mapper = CategoricalColorMapper(factors = ['setosa', 'virginica', 'versicolor'],
+                                pallete = ['red', 'green', 'blue'])
+
+p = figure(x_axis_label = 'petal_length', y_axis_label = 'sepal_length')
+p.circle(x = 'petal_length', y = 'sepal_length', source = source,
+         color = {'field': 'species', 'transform': mapper, legend = 'species'}, legend = 'species')
+
+plot.legend.location = 'top_left'
+p.legend.background_fill_color = 'lightgray'
+
+
+# layout
+from bokeh.layouts import row, column
+row_2 = column([p1, p2])
+layout = row([p3, row_2], sizing_mode = 'scale_width')
+output_file('layout.html')
+show(layout)
+
+p1.x_range = p2.x_range
+p1.y_range = p2.y_range
+
+
+# gridplot
+from bokeh.layouts import gridplot
+row_1 = [p1, p2]
+row_2 = [p3, p4]
+layout = gridplot([row_1, row_2])
+show(layout)
+
+
+# tabs
+from bokeh.models.widgets import Panel
+tab_1 = Panel(child = p1, title = 'Setosa')
+tab_2 = Panel(child = p2, title = 'Virginica')
+
+from bokeh.models.widgets import Tabs
+layout = Tabs(tabs = [tab1, tab2])
+show(layout)
+
+
+############# bokeh app
+from bokeh.io import curdoc
+from bokeh.layouts import widgetbox
+from bokeh.models import Slider
+
+# slider
+slider = Slider(title ='my slider', start = 0, end = 10, step = 0.1, value = 2)
+layout = column(p, widgetbox(slider))
+
+curdoc().add_root(layout)
+
+bokeh serve current.py
+
+# callback
+from bokeh.models import ColumnDataSource, Select
+
+source = ColumnDataSource(data = {'x': iris['Sepal_Length'], 'y': iris['Sepal_Width']})
+p = figure()
+p.circle('x', 'y', source = source)
+
+def update_plot(attr, old, new):
+    if new == 'Petal_Length':
+        source.data = {'x': 'Sepal_Length', 'y': 'Petal_Length'}
+    else:
+        source.data = {'x': 'Sepal_Length', 'y': 'Sepal_Length'}
+
+select = Select(title = 'part', options = ['sepal length', 'petal length'], value = 'Sepal_Length')
+select.on_change('value', update)
+
+layout = row(select, plot)
+curdoc().add_root(layout)
+
+
+# button
+from bokeh.models import Button
+button = Button(label = 'Hit me!')
+def update():
+
+button.on_click(update)
+
+from bokeh.models import Toggle, CheckboxGroup, RadioGroup
+toggle = Toggle(button_type = 'success', label = 'Toggle button')
+checkbox = CheckboxGroup(labels = ['Option 1', 'Option 2', 'Option 3'])
+radio = RadioGroup(labels = ['Option 1', 'Option 2', 'Option 3'])
+curdoc().add_root(widgetbox(toggle, checkbox, radio))
+
+
+# paragraph
+from bokeh.models.widgets import Paragraph
+
+p = Paragraph(text = '', width = 200, height = 400)
+show(widgetbox(p))
 
 ####################### Empirical cumulative distributions #######################
 def ecdf(data):

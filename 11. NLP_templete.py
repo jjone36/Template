@@ -177,7 +177,7 @@ re.sub(pattern, replacement, text)
 re.split()
 
 ###########################################################
-####################### Text Mining #######################
+####################### NLP_Udemy #######################
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -207,7 +207,6 @@ cv = CountVectorizer()
 cv = CountVectorizer(token_pattern, ngram_range = (1, 2))
 X = cv.fit_transform(corpus).toarray()     # making as a matrix
 y = dataset.iloc[:, 'target'].values
-
 
 ############# TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -243,8 +242,9 @@ similarities = df.dot(article)
 # Display those with the largest cosine similarity
 print(similarities.nlargest())
 
-###########################################################
-####################### tokenization #######################
+
+####################### NLP_Datacamp #######################
+############# nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from collections import Counter
 sentences = sent_tokenize(text)
@@ -280,22 +280,20 @@ bow = Counter(lemmatized)
 print(bow.most_common(10))
 
 
+############# gensim
 from gensim.corpora.dictionary import Dictionary
 from nltk.tokenize import word_tokenize
 tokenized = [word_tokenize(t.lower()) for t in text]
-# Create a Dictionary from the articles
+# mapping each of tokens
 dictionary = Dictionary(tokenized)
 dictionary.token2id
-computer_id = dictionary.token2id.get('computer')
-print(dictionary.get(computer_id))
-
-# Create a MmCorpus: corpus
+id_computer = dictionary.token2id.get('computer')
+print(dictionary.get(id_computer))
+# Create a corpus (token ID, frequency)
 corpus = [dictionary.doc2bow(a) for a in tokenized]
-# Print the first 10 word ids with their frequency counts from the fifth document
 print(corpus[4][:10])
 
 
-############# TfidfVectorizer
 from gensim.models.tfidfmodel import TfidfModel
 tfidf = TfidfModel(corpus)
 # Calculate the tfidf weights of doc
@@ -304,8 +302,6 @@ tfidf_weights = tfidf[doc]
 sorted_tfidf_weights = sorted(tfidf_weights, key = lambda w: w[1], reverse=True)
 for term_id, weight in sorted_tfidf_weights:
     print(dictionary.get(term_id), weight)
-
-#############
 
 
 ############# pos_tag
