@@ -3,6 +3,7 @@
 import keras
 from keras.models import Sequential
 from Keras.layers import Dense
+from keras.callbacks import EarlyStopping
 
 # initialize the ANN
 clas = Sequential()
@@ -10,12 +11,28 @@ clas = Sequential()
 # create hidden layers
 clas.add(Dense(input_dim = 11, output_dim = 6, init = 'uniform', activation = 'relu'))
 clas.add(Dense(output_dim = 3, init = 'uniform', activation = 'relu'))
-clas.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))   # softmax
+clas.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))  # softmax
 # compile: stochastic gradient descent
 clas.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+# -> 'mean_squared_error' / 'categorical_crossentropy'
 
-clas.fit(X_train, y_train, batch_size = 10, nb_epoch = 100)
+early_stopper = EarlyStopping(patience = 2)
+
+clas.fit(X_train, y_train, batch_size = 10, nb_epoch = 100, callbacks = [early_stopper])   # validation_split
 y_pred = clas.predict(X_test)
+
+
+model.save('model_file.h5')
+from keras.model import load_model
+my_model = load_model('model_file.h5')
+
+
+from keras.optimizers import SGD
+lr_to_test = [.000001, .01, 1]
+for lr in lr_to_test:
+    my_optimizer = SGD(lr = lr)
+    model.compile(optimizer = my_optimizer, loss = 'categorical_crossentropy')
+    model.fit(predictors, target)
 
 
 ############# Convolutional Neural Networks #############
@@ -54,7 +71,7 @@ train_generator = train_datagen.flow_from_directory('data/train',
                                                     target_size=(64, 64),
                                                     batch_size=32,
                                                     class_mode='binary')
-validation_generator = test_datagen.flow_from_directory('data/validation',
+validation_generator = test_datagen.flow_frgooom_directory('data/validation',
                                                         target_size=(64, 64),
                                                         batch_size=32,
                                                         class_mode='binary')
@@ -66,4 +83,3 @@ clas.fit_generator(train_generator,
 
 
 #################################################
-#############

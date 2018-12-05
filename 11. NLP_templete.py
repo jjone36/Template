@@ -208,14 +208,21 @@ cv = CountVectorizer(token_pattern, ngram_range = (1, 2))
 X = cv.fit_transform(corpus).toarray()     # making as a matrix
 y = dataset.iloc[:, 'target'].values
 
+
 ############# TfidfVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 tfidf = TfidfVectorizer()
+
+original_vocab = tfidf.vocabulary_
+vocab = [v:k for k, v in tfidf.vocabulary_.items()]
+
 csr_mat = tfidf.fit_transform(documents)
+csr_mat.shape
 print(csr_mat.toarray())
 # Get the words: words
 words = tfidf.get_feature_names()
 print(words)
+
 
 ############# NMF (Non-negative Matrix Factorization)
 from sklearn.decomposition import NMF

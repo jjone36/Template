@@ -141,12 +141,13 @@ print(df.shape)    # dim(df)
 print(df.columns)    # names(df)
 print(df.info())    # str(df)
 df.dtypes    # class()
-df.dtypes.value_counts()
+df.dtypes.value_counts(dropna = False)   # unique per columns
 df.describe()    # summary(df)
 
 df['State'].count()     # length()
 df['State'].nunique()     # n_distinct()
 df['State'].value_counts(dropna = False)     # count()
+df['State'].value_counts(normalize = True)
 df.sort_values('Temperature', ascending =  False)     # sort()
 
 df['State'].median()
@@ -158,7 +159,7 @@ mean = df.mean(axis = 'columns')
 mean.plot()
 plt.show()
 
-df.gender = df.gender.astype('category')
+df.gender = df.gender.astype('category')   # 'int'
 df.gender = df.gender.astype('str')
 df['total_price'] = pd.to_numeric(df['total_price'], errors = 'coerce')     # object => numeric + NaN
 df['date'] = pd.to_datetime(df['date'])
@@ -176,7 +177,7 @@ df.year2 = df.year.cat.reorder_categories(['2017', '2018'], order = True)
 print(df.year.cat.categories)
 
 # NaN, NA
-nulls_per_column = df.isnull().sum()
+df.isnull().sum()
 df.loc[pd.isnull(df.year)]
 
 assert df.notnull.all()      # checking NA for each columns
@@ -186,7 +187,7 @@ assert (df >= 0).all().all()     # asserting all values of df are greater than 0
 assert df.gender.dtypes == np.object
 
 # fill NA
-df.dropna()
+df.dropna(subset = ['total_price'], inplace = True)
 df.reindex('year').ffill()    # forward-filling NA
 df.total_price.fillna(-1, inplace = True)
 df['total_price'] = df.total_price.fillna(df.total_price.mean())
@@ -201,7 +202,7 @@ pd.melt(iris, col_level = 0)     # key-value pairs
 iris_pivot = iris_melt.pivot_table(index = 'Species', columns = 'Measurement', values = 'Values',
                                    aggfunc = np.mean)     # aggfunc = count -> frequency
 print(iris_pivot.index)    # print the original index before pivoting
-iris_pivot_reset = iris_pivot.reset_index()    # reset the index
+iris_pivot.reset_index(inplace = True)    # reset the index
 iris_pivot = iris_melt.pivot_table(index = 'Species', columns = 'Measurement', values = 'Values',
                                    aggfunc = 'sum', margins = True)
 
@@ -218,11 +219,12 @@ combined = df1.append(df2, ignore_index = True)
 row_concat = pd.concat([df1, df2, df3])
 
 col_concat = pd.concat([df1, df2, df3], keys = ['A1', 'A2', 'A3'], axis = 1, join = 'inner')
-# axis = 0: rows(vertically) / 1: columns(horizontally)
+# axis = 0: rows(vertically) / 1: columns(
+izontally)
 
 # inner_join
-blue_red = {'Obama':'blue', 'Trumph':'red'}
-election['color'] = election['winner'].map(blue_red)      '''print(list(map(binge_male, num_drinks)))'''
+mapping = {'Obama':'blue', 'Trumph':'red'}
+election['color'] = election['winner'].map(mapping)      # print(list(map(binge_male, num_drinks)))
 
 pd.merge(df1, df2, on = 'city')
 pd.merge(df1, df2, on = ['city', 'country'], suffixes = ['_D1', '_D2'])
@@ -235,6 +237,8 @@ df_2 = df.drop_duplicates()
 df.dropna(how = 'any')    # if there is any NA in a row
 df.dropna(how = 'all')    # if all the values are NA in a row
 df.dropna(thresh = 1000, axis = 'columns')    # drop the axis if it's over thresh
+
+df_sub = df[df['col'].notnull()]
 
 # groupby
 titanic.groupby(['pclass', 'embarked']).['survived'].count()

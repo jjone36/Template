@@ -12,12 +12,6 @@ rules = apriori(transactions, min_support, min_confidence, min_lift, min_length 
 results = list(rules)
 
 
-
-
-
-
-
-
 ###########################################################
 ###### Association Rule Learning in R
 ## Sparse Matrix

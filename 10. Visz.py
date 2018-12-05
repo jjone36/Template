@@ -107,6 +107,7 @@ df['x'].plot.hist()
 sns.distplot(df['x'], kde = False, bins = 30)
 
 # geom_bar()
+df.plot(x, y, kind = 'barh')
 sns.countplot(data = df, y = 'weight')
 sns.barplot(x, y, data)
 

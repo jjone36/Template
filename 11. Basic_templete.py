@@ -64,6 +64,11 @@ X_test_scaled = sc_X.transform(X_tsst)
 from sklearn.preprocessing import normalizer
 normalizer = normalizer(X)
 
+# feature engineering
+df.time = pd.to_datetime(df.time)
+df['mnoth'] = df.time.apply(lambda row: row.month)
+
+
 ###### Dimensionality Reduction
 # Pricipal Component Analysis
 from sklearn.decomposition import PCA
@@ -75,7 +80,7 @@ pca.n_components_
 pca.mean_
 
 features = range(pca.n_components_)
-plt.bar(features, pca.explained_variance_)
+plt.bar(features, pca.explained_variance_ratio_)
 plt.xlabel('PCA feature')
 plt.ylabel('variance')
 plt.xticks(features)
