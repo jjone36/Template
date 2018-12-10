@@ -334,6 +334,13 @@ np.random.binomial()
 np.random.poisson()
 np.random.exponential()
 
+random.randrange(0, 101, 2)   # even integer from 0 to 100
+random.choice('abcdefg')
+random.shuffle([1, 2, 3, 4, 5, 6, 7])
+random.sample([1, 2, 3, 4, 5], 3)   # choose 3 elements
+
+
+
 ####################### functions #######################
 def three_shouts(X1, X2, X3):
     # nested function
@@ -456,27 +463,3 @@ central.dt.tz_convert('US/Eastern')
 pd.merge(df1, df2, on = 'date').sort_values('date')
 pd.merge_ordered(df1, df2, on = 'date')
 pd.merge_asof()
-
-####################### Visualization #######################
-import matplotlib.pyplot as plt
-
-iris.plot(kind = 'scatter', x = 'Sepal_Length', y = 'Sepal_Width')
-iris['Speices'].plot(subplots = True, title = 'Iris Species')
-
-plt.xlabel('Iris Sepal Length')
-plt.ylabel('Iris Sepal Width')
-
-plt.xlim(20, 40)
-plt.ylim(20, 40)
-
-plt.show()
-plt.clf()
-
-# facet
-cols = ['weight', 'mpg']
-df[cols].plot(kind = 'box', subplots = True)
-
-plt.subplots(nrows = 2, ncols = 1)
-df.weight.plot(ax = axes[0], kind = 'hist', normed = True, bins = 30, range = (0, .3))
-df.weight.plot(ax = axes[1], kind = 'hist', normed = True, cumulative = True, bins = 30, range = (0, .3))
-plt.show()

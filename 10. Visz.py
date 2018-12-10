@@ -37,10 +37,8 @@ plt.tight_layout()
 plt.show()
 
 ## position : 1. 9. 2 / 6. 10. 7 / 3. 8. 4 / 0. 5
-plt.subplots(2, 2, 2)
-plt.plot(year, computer_science, color = 'red', legend = 'Computer Science')
-plt.subplots(2, 2, 1)
-plt.plot(year, physical_sciences, color = 'blue', legend = 'Physical Sciences')
+plt.subplots(2, 2, 2); plt.plot(year, computer_science, color = 'red', legend = 'Computer Science')
+plt.subplots(2, 2, 1); plt.plot(year, physical_sciences, color = 'blue', legend = 'Physical Sciences')
 plt.legend(loc = 'lower center')
 
 # FacetGrid
