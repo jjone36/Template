@@ -1,4 +1,72 @@
 #################################################
+############# Tensorflow Basic #############
+import tensorflow as tf
+
+a = tf.constant(2)      # create tensors
+b = tf.constant(10)
+c = tf.multiply(a, b)   # write operations between the tenseors
+
+sess = tf.Session()     # create a Session
+print(sess.run(c))      # run the session and initialize the variables
+
+
+y_hat = tf.constant(36, name = 'y_hat')
+y = tf.constant(39, name = 'y')
+loss = tf.Variable((y - y_hat)**2, name = 'loss')
+
+init = tf.global_variables_initializer()
+
+with tf.Session() as sessi:
+    sess.run(init)
+    print(sess.run(loss))
+
+# placeholders whose values you will specify only later
+x = tf.placeholder(tf.int64, name = 'x')         # create placeholders
+sigmoid = tf.sigmoid()                           # specify the computation graph
+print(sess.run(sigmoid, feed_dict = {x : 3}))    # create and run the session using feed dictionary
+sess.close()
+
+#####################################################
+############# Keras Basic #############
+from keras.layers import Input, Dense
+input_tensor = Input(shape = (1,))
+output_tensor = Dense(1)(input_tensor)
+
+from keras.models import Model
+model = Model(inputs = input_tensor, outputs = output_tensor)
+model.compile(optimizer = 'adam', loss = 'mean_absolute_error')
+model.summary()
+model.get_weights()
+
+# Plot the model
+plot_model(model, to_file = 'model.png')
+import matplotlib.pyplot as plt
+img = plt.imread('model.png')
+plt.imshow(img)
+plt.show()
+
+# Fit the model
+model.fit(X_train, y_train, epochs = 10, batch_size = 64, validation_split = .2, verbose = True)
+model.evaluate(x = X_dev, y = y_dev)
+
+# Prediction
+model.predict()
+
+############# More layers
+# Embedding layer
+from keras.layers import Embedding, Flatten
+embed_layer = Embedding(input_dim = m, input_length = 1, output_dim = 1, name = '')
+embed_tensor = embed_layer(input_tensor)
+flatten_tensor = Flatten()(embed_tensor)
+model = Model(inputs = input_tensor, outputs = flatten_tensor)
+
+# Merging layers
+in_tensor_1 = Input(shape = (1,))
+in_tensor_2 = Input(shape = (1,))
+out_tensor = Add()([in_tensor_1, in_tensor_2])   # Subtract(), Concatenate()
+model = Model(inputs = [in_tensor_1, in_tensor_2], outputs = out_tensor)
+
+#####################################################
 ############# Artificial Neural Network #############
 import keras
 from keras.models import Sequential
@@ -33,7 +101,6 @@ for lr in lr_to_test:
     my_optimizer = SGD(lr = lr)
     model.compile(optimizer = my_optimizer, loss = 'categorical_crossentropy')
     model.fit(predictors, target)
-
 
 ############# Convolutional Neural Networks #############
 from keras.models import Sequential

@@ -225,6 +225,9 @@ y_pred_prob = clas.predict_proba(X_test)[:, 1]
 from sklearn.metrics import roc_curve
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
 
+# decisiton boundary
+plot_decision_boundary(lambda x: clas.predict(x), X_test, y_test)
+plt.title('Decision Boundary')
 
 # StratifiedShuffleSplit??
 # multiple class

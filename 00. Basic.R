@@ -197,8 +197,8 @@ wiki_infobox(name = 'Ed sheeran')
 #### API ####
 ## Youtube
 #https://help.aolonnetwork.com/hc/en-us/articles/218079623-How-to-Create-Your-YouTube-API-Credentials#1
-api_key = '542589435889-5o92q1aojo6lan2qmgd8in1v7hvdmuv6.apps.googleusercontent.com'
-api_secret = 'ngqxw_Z2ZvVI_ZOI8mQvqlK6'
+api_key = ''
+api_secret = ''
 
 yt_oauth(app_id = api_key, app_secret = api_secret)
 file.remove('.httr-oauth')
@@ -206,10 +206,10 @@ file.remove('.httr-oauth')
 ## Twitter
 library(twitteR)
 
-api_key = 'nSRwsAPYUm5qFuKMnZYCw4Cf4'
-api_secret = 'i3hepe95lUqizYy9xBgGInhjfALzgJRqUGBBUhJ9Lzs5xCuWMs'
-myToken = '1040508187407933440-nsCV8iTHIYorJPG0muY7lSoToV9THk'
-myToken_secret = 'jDViyINeo4FtZBd0P1rv0p2dReGQ5Hk9FcbvkU10BGzF7'
+api_key = ''
+api_secret = ''
+myToken = ''
+myToken_secret = ''
 
 setup_twitter_oauth(consumer_key = api_key, consumer_secret = api_secret,
                     access_token = myToken, access_secret = myToken_secret)
