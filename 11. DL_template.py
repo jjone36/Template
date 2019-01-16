@@ -1,5 +1,5 @@
 #################################################
-############# Tensorflow Basic #############
+############# Tensorflow Basic
 import tensorflow as tf
 
 a = tf.constant(2)      # create tensors
@@ -27,7 +27,7 @@ print(sess.run(sigmoid, feed_dict = {x : 3}))    # create and run the session us
 sess.close()
 
 #####################################################
-############# Keras Basic #############
+############# Keras Basic
 from keras.layers import Input, Dense
 input_tensor = Input(shape = (1,))
 output_tensor = Dense(1)(input_tensor)
@@ -108,7 +108,7 @@ from keras.layers import Convolution2D, MaxPooling2D, Flatten, Dense
 
 clas = Sequential()
 
-# convolutional layer (^?)
+# convolutional layer
 clas.add(Convolution2D(32, 3, 3), input_shape = (64, 64, 3), activation = 'relu')
 # pooling layer
 clas.add(MaxPooling2D(pool_size = (2, 2)))
@@ -119,7 +119,7 @@ clas.add(MaxPooling2D(pool_size = (2, 2)))
 
 # flattening
 clas.add(Flatten())
-# full connection (^?)
+# full connection
 clas.add(Dense(output_dim = 128, activation = 'relu'))
 clas.add(Dense(output_dim = 5, activation = 'softmax'))
 clas.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
