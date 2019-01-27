@@ -52,7 +52,7 @@ model.evaluate(x = X_dev, y = y_dev)
 # Prediction
 model.predict(X_test)
 
-############# More layers
+########################## More layers
 # Embedding layer
 from keras.layers import Embedding, Flatten
 embed_layer = Embedding(input_dim = m, input_length = 1, output_dim = 1, name = '')
@@ -108,7 +108,7 @@ model.save('model_file.h5')
 from keras.model import load_model
 my_model = load_model('model_file.h5')
 
-############# Regularization
+########################## Regularization
 # Dropout
 from keras.layers import Dropout
 model.add(Dropout(.25))
@@ -117,7 +117,7 @@ model.add(Dropout(.25))
 from keras.layers import BatchNormalization
 model.add(BatchNormalization())
 
-############# grid search
+########################## grid search
 from keras.optimizers import SGD
 lr_to_test = [.000001, .01, 1]
 for lr in lr_to_test:
@@ -161,18 +161,20 @@ model.add(MaxPool2D(2))
 # into one big array
 model.add(Flatten())
 
-# full connection
+# full connection layer
 model.add(Dense(output_dim = 128, activation = 'relu'))
 model.add(Dense(output_dim = 5, activation = 'softmax'))
+
+# building and optimizatiion
 model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])
 
 model.summary()
 
-# Fit the model
+# Fitting
 model.fit(X_train, y_train, epochs = 10, batch_size = 64, validation_split = .2, verbose = True)
 model.evaluate(x = X_dev, y = y_dev)
 
-############# image data preprocessing
+########################## image data preprocessing
 from keras.preprocessing.image import ImageDataGenerator
 train_gen = ImageDataGenerator(rescale=1./255,
                                shear_range=0.2,
@@ -208,11 +210,12 @@ test_generator = test_gen.flow_from_dataframe(test_df, dir,
                                               y_col='category',
                                               target_size = im_size,
                                               batch_size = batch_size)
+
 predict = model.predict_generator(test_generator, steps = n_samples // batch_size))
 test_df['prob'] = predict
-test_df['category'] = np.where(test_df['prob'] > .5, 1,0)
+test_df['category'] = np.where(test_df['prob'] > .5, 1, 0)
 
-############# callbacks
+########################## callbacks
 # Learning rate reduction
 from keras.callbacks import ReduceLROnPlateau
 learning_rate_reducer = ReduceLROnPlateau(monitor='val_acc',
@@ -228,7 +231,7 @@ checker = ModelCheckpoint('weights.hdf5', monitor = 'val_loss', save_best_only =
 callbacks = [early_stopper, learning_rate_reducer, checker]
 
 
-############# Get the weights
+########################## Get the weights
 conv_1 = model.layers[0]
 weights_1 = conv_1.get_weights()
 len(weights_1)
