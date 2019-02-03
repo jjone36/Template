@@ -183,7 +183,7 @@ train_gen = ImageDataGenerator(rescale=1./255,
 train_generator = train_gen.flow_from_directory(dir,
                                                 target_size=(64, 64),
                                                 batch_size=32,
-                                                models_mode='binary')
+                                                class_mode='binary')
 
 val_gen = ImageDataGenerator(rescale = 1./255)
 val_generator = val_gen.flow_from_dataframe(val_df, dir,
@@ -195,7 +195,7 @@ val_generator = val_gen.flow_from_dataframe(val_df, dir,
 history = model.fit_generator(train_generator,
                     epochs = 50,
                     validation_data = val_generator,
-                    validation_steps = val_df.shape[0] // batch_size,
+                    Gvalidation_steps = val_df.shape[0] // batch_size,
                     steps_per_epoch= train_df.shape[0] // batch_size,
                     callbacks = callbacks)
 
