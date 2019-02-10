@@ -1,4 +1,5 @@
 #################################################
+'https://www.kaggle.com/ashishpatel26/tensorflow-for-beginner-to-advance'
 ####################### Basic
 import tensorflow as tf
 
@@ -26,6 +27,35 @@ sigmoid = tf.sigmoid()                           # specify the computation graph
 print(sess.run(sigmoid, feed_dict = {x : 3}))    # create and run the session using feed dictionary
 
 sess.close()
+
+####################### Simple ANN
+m, n_input = features.shape
+hidden_1 = 10
+
+X = tf.placeholder(tf.float32, [None, n_input])
+y = tf.placeholder(tf.float32, [None, 1])
+
+tf.global_variables_initializer()
+
+Z1 = tf.layers.dense(X, hidden_1, activation_fn = tf.nn.relu)
+A1 = tf.layers.dense(Z1, 1)
+
+loss = tf.losses.mean_squared_error(logits = A1, labels = y)
+optimizer = tf.train.GradientDescentOptimizer(learning_rate = .01).minimize(loss)
+
+# Model saver
+def saver():
+
+    init = tf.global_variables_initializer()
+
+    with tf.Session() as sess:
+    sess.run(init)
+
+    saver = tf.train.Saver()
+    for step in range(100):
+        sess.run([optimizer, loss], feed_dict = {X : X_train, y : y_train})
+
+    saver.save(sess, save_path, write_meta_graph = False)
 
 #####################################################################
 ############# Preprocessing
@@ -145,7 +175,7 @@ def plot_cost(costs, y_hat, y):
     accuracy = tf.reduce_mean(tf.cast(correct_pred, 'float'))
     return accuracy
 
-############# Computing 
+############# Computing
 learning_rate = .01
 epochs = 10
 batch_size = 300
@@ -170,9 +200,6 @@ def model(X_train, y_train, learning_rate = learning_rate, epochs = epochs, batc
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
     # Initialize the variables globally
-    init = tf.global_variables_initializer()
-
-    # Initialization all the variables globally
     init = tf.global_variables_initializer()
 
     # Run the session and compute
