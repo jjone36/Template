@@ -194,6 +194,7 @@ stream = tweepy.Stream(auth, l)
 stream.filter(track = ['clinton', 'trump', 'sanders', 'cruz'])
 
 ####################### Dask #######################
+# https://www.datacamp.com/courses/parallel-computing-with-dask
 ############# Big data Importing
 df = []
 for chunk in pd.read_csv('big_data.csv', chunksize = 10000):

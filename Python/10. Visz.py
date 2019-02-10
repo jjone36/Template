@@ -157,6 +157,29 @@ sns.heatmap(df_crosstab, annot = True, fmt = 'd', cmap = 'YlGnBu', cbar = False,
             linewidths = .3, center = df_crosstab.loc = [6, 9])
 
 #####################################################################
+import matplotlib.patches as mpatches
+
+x = np.array([100, 105, 110, 124, 136, 155, 166, 177, 182, 196, 208, 230, 260, 294, 312])
+y = np.array([54, 56, 60, 60, 60, 72, 62, 64, 66, 80, 82, 72, 67, 84, 74])
+z = (x*y) / 60
+
+for index, val in enumerate(z):
+    if index < 10:
+        color = 'g'
+    else:
+        color = 'r'
+    plt.scatter(x[index], y[index], s=z[index]*5, alpha=0.5, c=color)
+
+red_patch = mpatches.Patch(color='red', label='Male')
+green_patch = mpatches.Patch(color='green', label='Female')
+plt.legend(handles=[green_patch, red_patch])
+
+plt.title("French fries eaten vs height and weight")
+plt.xlabel("Weight (pounds)")
+plt.ylabel("Height (inches)")
+plt.show()
+
+#####################################################################
 http://bokeh.github.io
 ####################### Bokeh #######################
 from bokeh.plotting import figure
