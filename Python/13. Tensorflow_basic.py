@@ -35,8 +35,6 @@ hidden_1 = 10
 X = tf.placeholder(tf.float32, [None, n_input])
 y = tf.placeholder(tf.float32, [None, 1])
 
-tf.global_variables_initializer()
-
 Z1 = tf.layers.dense(X, hidden_1, activation_fn = tf.nn.relu)
 A1 = tf.layers.dense(Z1, 1)
 
@@ -182,27 +180,27 @@ batch_size = 300
 
 def model(X_train, y_train, learning_rate = learning_rate, epochs = epochs, batch_size = batch_size):
 
-    # Create placeholders
     (m, im_size, im_size, 3) = X_train.shape
     n_class = y_train.shape[1]
     costs = []
 
+    # Step 1. Create placeholders
     X = tf.placeholder(tf.float32, [None, im_size, im_size, 3])
     y = tf.placeholder(tf.float32, [None, n_class])
 
-    # Forward propagation
+    # Step 2. Forward propagation
     y_hat = forward_propagation(X = x, n_class = n_class)
 
-    # Cost function
+    # Step 3. Cost function
     cost = compute_cost(y_hat, y)
 
-    # Backpropagation
+    # Step 4. Backpropagation
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
 
-    # Initialize the variables globally
+    # Step 5. Initialize the variables globally
     init = tf.global_variables_initializer()
 
-    # Run the session and compute
+    # Step 6. Run the session and compute
     with tf.Session() as sess:
         sess.run(init)
 
@@ -223,6 +221,6 @@ def model(X_train, y_train, learning_rate = learning_rate, epochs = epochs, batc
             if epoch % 1 == 0:
                 costs.append(batch_cost)
 
-    # plot the cost
+    # step 7. plot the cost
     acc = plot_cost(costs, y_hat = Z3, y = y_train)
     return acc

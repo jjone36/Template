@@ -195,6 +195,7 @@ stream.filter(track = ['clinton', 'trump', 'sanders', 'cruz'])
 
 ####################### Dask #######################
 # https://www.datacamp.com/courses/parallel-computing-with-dask
+# https://www.kaggle.com/ashishpatel26/dask-why-every-data-scientist-should-use-dask
 ############# Big data Importing
 df = []
 for chunk in pd.read_csv('big_data.csv', chunksize = 10000):
@@ -263,7 +264,6 @@ import dask.dataframe as dd
 dd.compute().info()
 
 df = dd.read_csv('*.csv', assume_missing = True)
-
 
 ############# Dask bags -> dataframe
 import dask.bag as db

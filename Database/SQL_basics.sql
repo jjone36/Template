@@ -144,3 +144,67 @@ group by s.name
 order by 4 desc;
 
 ########################### Sub-query
+select channel, avg(num)
+from
+    (select date_trunc('day', occurred_at) as day, channel, count(*) as num
+    from web_events
+group by 1, 2) as sub
+group by channel
+order by 2;
+
+select avg(standard_qty) avg_standard, sum(total_amt_usd)
+from orders
+where date_trunc('month', occurred_at) =
+    (select date_trunc('month', occurred_at)
+    from orders
+    order by 1
+    limit 1);
+
+########################### with_
+'https://classroom.udacity.com/courses/ud198/lessons/b50a9cfd-566a-4b42-bf4f-70081b557c0b/concepts/a4ea6477-dbb6-4890-ac82-ad19f60cc3c5'
+with t1 as (select s.name sales_name, r.name region_name, sum(o.total_amt_usd) sum
+from orders o
+join accounts a
+on o.account_id = a.id
+join sales_reps s
+on s.id = a.sales_rep_id
+join region r
+on r.id = s.region_id
+group by 1, 2
+order by 3),
+
+    t2 as (select region_name, max(sum) max
+    from t1
+    group by region_name)
+
+select t1.sales_name, t2.region_name, t2.max
+from t1
+join t2
+on t1.region_name = t2.region_name
+where t1.sum = t2.max;
+
+#################################################################################
+## LEFT / RIGHT / UPPER / LOWER / CONCAT / REPLACE / SUBSTR / COALESCE
+with t1 as (SELECT name,
+        CASE WHEN left(name, 1) in ('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
+        THEN 1 ELSE 0 END AS vowel, count(*) num
+FROM accounts
+group by 1, 2)
+
+select vowel, sum(vowel), sum(num)
+from t1
+group by vowel;
+
+
+with t1 as (select replace(name, ' ', '') as company,
+        left(primary_poc, strpos(primary_poc, ' ')) as first,
+        left(primary_poc, -strpos(primary_poc, ' ')) as last
+        from accounts)
+
+select concat(first, '.', last, '@', company, '.com') as address
+from t1
+
+
+select date,
+   concat(SUBSTR(date, 7, 4), '-', left(date, 2), '-', substr(date, 4, 2))::DATE date_2
+from sf_crime_data
