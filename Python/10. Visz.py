@@ -34,6 +34,7 @@ ax2.scatter(df['weight'], df['mpg'])
 ax2.set(xlabel = 'weight of auto', xlim = (10, 100), title = 'Scatter Plot')
 
 plt.tight_layout()
+plt.subplots_adjust(wspace = .5, hspace = .5)
 plt.show()
 
 ## position : 1. 9. 2 / 6. 10. 7 / 3. 8. 4 / 0. 5

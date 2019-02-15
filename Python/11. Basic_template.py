@@ -48,18 +48,19 @@ print(dv.vocabulary_)
 # Apply dv on df: df_encoded
 df_encoded = dv.fit_transform(df_dict)
 
-# Split the dataset
-from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .2, random_state = 42)
-
-# Feature scaling
+###### Data Preprocessing
 from sklearn.preprocessing import scale
 X_scaled = scale(X)
 
 from sklearn.preprocessing import StandardScaler
-sc_X = StandardScaler()
-X_train_scaled = sc_X.fit_transform(X_train)
-X_test_scaled = sc_X.transform(X_tsst)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit(X_train)
+X_test_scaled = scaler.transform(X_tsst)
+
+from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+mm_scaler = MinMaxScaler()
+X_train_scaled = mm_scaler.fit_transform(X_train)
+X_test_scaled = mm_scaler.transform(X_test)
 
 from sklearn.preprocessing import normalizer
 normalizer = normalizer(X)
@@ -68,6 +69,9 @@ normalizer = normalizer(X)
 df.time = pd.to_datetime(df.time)
 df['mnoth'] = df.time.apply(lambda row: row.month)
 
+# Split the dataset
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .2, random_state = 42)
 
 ###### Dimensionality Reduction
 # Pricipal Component Analysis
