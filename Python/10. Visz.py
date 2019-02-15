@@ -1,6 +1,8 @@
-http://www.colors.commutercreative.com/grid/
-####################### Visualization #######################
+# http://www.colors.commutercreative.com/grid/
+
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 iris.plot(kind = 'scatter', x = 'Sepal_Length', y = 'Sepal_Width')
 iris['Speices'].plot(subplots = True, title = 'Iris Species')
@@ -42,6 +44,33 @@ plt.subplots(2, 2, 2); plt.plot(year, computer_science, color = 'red', legend = 
 plt.subplots(2, 2, 1); plt.plot(year, physical_sciences, color = 'blue', legend = 'Physical Sciences')
 plt.legend(loc = 'lower center')
 
+#######################
+# geom_point()
+df.plot(x, y, kind = 'scatter')
+df.scatter(x, y)
+
+plt.scatter(df['x'], df['y'])
+sns.regplot(x, y, data, scatter = None, label = 'Order 1')
+sns.regplot(x, y, data, fit_reg = False, x_bins = 10)
+sns.lmplot(x, y, data, fit_reg = False)
+
+# geom_baxplot()
+df.boxplot(column, by)
+sns.boxplot(x, y, data)
+
+# geom_hist()
+plt.hist(df['x'])
+df['x'].plot.hist()
+sns.distplot(df['x'], kde = False, bins = 30)
+
+# geom_bar()
+df.plot(x, y, kind = 'barh')
+sns.countplot(data = df, y = 'weight')
+sns.barplot(x, y, data)
+
+plt.show()
+plt.clf()
+
 # FacetGrid
 f = sns.FacetGrid(df, row = 'smoker', col = 'diagnose', hue = 'gender')
 f.map(plt.scatter, 'weight', 'age')
@@ -82,38 +111,7 @@ plt.style.use('ggplot')
 
 plt.savefig('plot1.png')
 
-#####################################################################
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# geom_point()
-df.plot(x, y, kind = 'scatter')
-df.scatter(x, y)
-
-plt.scatter(df['x'], df['y'])
-sns.regplot(x, y, data, scatter = None, label = 'Order 1')
-sns.regplot(x, y, data, fit_reg = False, x_bins = 10)
-sns.lmplot(x, y, data, fit_reg = False)
-
-# geom_baxplot()
-df.boxplot(column, by)
-sns.boxplot(x, y, data)
-
-# geom_hist()
-plt.hist(df['x'])
-df['x'].plot.hist()
-sns.distplot(df['x'], kde = False, bins = 30)
-
-# geom_bar()
-df.plot(x, y, kind = 'barh')
-sns.countplot(data = df, y = 'weight')
-sns.barplot(x, y, data)
-
-plt.show()
-plt.clf()
-
-####################### Seaborn special #######################
+####################### Seaborn
 # set default Seaborn style
 sns.set()
 sns.set_style('whitegird')   # dark, white
@@ -158,31 +156,90 @@ sns.heatmap(df_crosstab, annot = True, fmt = 'd', cmap = 'YlGnBu', cbar = False,
             linewidths = .3, center = df_crosstab.loc = [6, 9])
 
 #####################################################################
-import matplotlib.patches as mpatches
+####################### Plotly
+# https://plot.ly/python/
+# https://www.kaggle.com/pavanraj159/telecom-customer-churn-prediction
 
-x = np.array([100, 105, 110, 124, 136, 155, 166, 177, 182, 196, 208, 230, 260, 294, 312])
-y = np.array([54, 56, 60, 60, 60, 72, 62, 64, 66, 80, 82, 72, 67, 84, 74])
-z = (x*y) / 60
+from plotly.offline import init_notebook_mode, iplot
+init_notebook_mode(connected=True)
+import plotly.graph_objs as go
 
-for index, val in enumerate(z):
-    if index < 10:
-        color = 'g'
-    else:
-        color = 'r'
-    plt.scatter(x[index], y[index], s=z[index]*5, alpha=0.5, c=color)
+# Scatter plot
+trace_1 = go.Scatter(x = df.age, y = df.height, mode = 'markers')
+trace_2 = go.Scatter(x = df.age, y = df.weight, mode = 'markers')
+data = [trace_1, trace_2]
+iplot(data)
 
-red_patch = mpatches.Patch(color='red', label='Male')
-green_patch = mpatches.Patch(color='green', label='Female')
-plt.legend(handles=[green_patch, red_patch])
+# line plot
+trace_1 = go.Scatter(x = df.date, y = df.price, name = 'Price',
+                     line = dict(color = '#4976bc'), opacity = .5)
 
-plt.title("French fries eaten vs height and weight")
-plt.xlabel("Weight (pounds)")
-plt.ylabel("Height (inches)")
-plt.show()
+# Bar plot
+trace_1 = go.Bar(x = df.age, y = df.height, name = 'Height',
+                marker = {line = {width : .5, color : 'black'}}, opacity = .5)
+trace_2 = go.Bar(x = df.age, y = df.weight, name = 'Weight')
+data = [trace_1, trace_2]
+layout = go.Layout(title = 'Height & Weight', barmode = 'group')
+
+fig = go.Figure(data, layout)
+iplot(fig)
+
+# Histogram
+trace = go.Histogram(x = df.Survived, histnorm = 'percent', name = 'Survived rate',
+                    marker = {line = {width : .5, color : 'black'}}, opacity = .6)
+
+# Pie plot
+labs = df.embarked.value_counts().keys().tolist()
+vals = df.embarked.value_counts().values.tolist()
+trace = go.Pie(labels = labs, values = vals, hole = .4, name = 'Embarked')
+
+
+# 3D Scatter
+x = df.numGroups
+y = df.maxPlace
+z = df.killPlace
+trace = go.Scatter3d(x = x, y = y, z = z,
+                    mode = 'markers',
+                    marker = dict(size = 12, color = z, opacity = .5))
+
+data = [trace]
+layout = go.Layout(margin = dict(l = 0, r = 0, b = 0, t = 0))
+
+
+# Maps
+import shapely
+import shapefile
+from plotly.figure_factory._county_choropleth import create_choropleth
+import geopandas
+
+colorscale = ["#171c42","#223f78","#1267b2","#4590c4","#8cb5c9","#b6bed5","#dab2be",
+"#d79d8b","#c46852","#a63329","#701b20","#3c0911"]
+
+values = df.TOT_POP.tolist()
+fips = df.FIPS.tolist()
+
+fig = create_choropleth(scope = scope, values = values, fips = fips,
+                        round_legend_values = True,
+                        # show_state_data = True,
+                        simplify_county = 0,
+                        simplify_state = 0,
+                        county_outline = {'color': 'rgb(15, 15, 55)', 'width': .5},
+                        state_outline = {'width' : .5},
+                        legend_title = 'Population Per Country')
+iplot(fig, filename = 'Choropleth Map')
+
+
+# Polar plot
+r = df.Survived.values.tolist()
+theta = df.Embarked.tolist()
+trace = go.Scatterpolar(r = r, theta = theta, name = "Embarked vs Survive",
+                        fill  = "toself", mode = "markers+lines",
+                        marker = dict(size = 5))
+
 
 #####################################################################
-http://bokeh.github.io
-####################### Bokeh #######################
+####################### Bokeh
+# http://bokeh.github.io
 from bokeh.plotting import figure
 from bokeh.io import output_file, show
 
@@ -311,7 +368,31 @@ from bokeh.models.widgets import Paragraph
 p = Paragraph(text = '', width = 200, height = 400)
 show(widgetbox(p))
 
-####################### Empirical cumulative distributions #######################
+#####################################################################
+####################### Patch plot
+import matplotlib.patches as mpatches
+
+x = np.array([100, 105, 110, 124, 136, 155, 166, 177, 182, 196, 208, 230, 260, 294, 312])
+y = np.array([54, 56, 60, 60, 60, 72, 62, 64, 66, 80, 82, 72, 67, 84, 74])
+z = (x*y) / 60
+
+for index, val in enumerate(z):
+    if index < 10:
+        color = 'g'
+    else:
+        color = 'r'
+    plt.scatter(x[index], y[index], s=z[index]*5, alpha=0.5, c=color)
+
+red_patch = mpatches.Patch(color='red', label='Male')
+green_patch = mpatches.Patch(color='green', label='Female')
+plt.legend(handles=[green_patch, red_patch])
+
+plt.title("French fries eaten vs height and weight")
+plt.xlabel("Weight (pounds)")
+plt.ylabel("Height (inches)")
+plt.show()
+
+####################### Empirical cumulative distributions
 def ecdf(data):
     """Compute ECDF for a one-dimensional array of measurements."""
     # Number of data points: n
@@ -329,13 +410,12 @@ iqr = np.percentile(height, q = a)
 plt.plot(iqr, a/100, marker = 'D', color = 'red')
 plt.show()
 
-
 ####################### 2D Array Plot #######################
 import numpy as np
 
 a = np.linspace(-2, 2, 41)
 b = np.linspace(-1, 1, 21)
-X,Y = np.meshgrid(a, b)
+X, Y = np.meshgrid(a, b)
 Z = np.sin(np.sqrt(X**2 + Y**2))
 
 plt.pcolor(Z, cmap = 'Blues')     # cmap = 'autumn', 'gray'
@@ -355,17 +435,3 @@ plt.hexbin(hp, mpg, gridsize = (15, 12), extent = (40, 235, 8, 48))
 
 plt.colorbar()
 plt.show()
-
-####################### image #######################
-# Load the image into an array: img
-img = plt.imread('480px-Astronaut-EVA.jpg')
-# Print the shape of the image
-print(img)
-print(img.shape)
-# Display the image
-plt.imshow(img)
-# Hide the axes
-plt.axis('off')
-plt.show()
-
-plt.imshow(img, extent = (-1,1,-1,1), aspect = 2)

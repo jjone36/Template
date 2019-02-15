@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+# Step 0. Understand the data (Please don't skip it)
+
 # Step 1. Import the dataset
 tr = pd.read_csv('train.csv')
 te = pd.read_csv('test.csv')
@@ -17,13 +19,16 @@ print("Test shape is : ", te.shape)
 
 # Data overview
 tr.head()
-tr.info()
-tr.isnull().sum()
+print ("Data types : \n" , tr.info()
+print ("\nFeatures : \n" , tr.columns.tolist())
+print ("\nUnique values :  \n", tr.nunique())
+print ("\nMissing values :  ", tr.isnull().sum())
 tr.fillna('NaN', inplace = True)
 
 # Concat train and test set
 a = len[tr]
 tr_te = pd.concat([tr, te], axis = 0)
+
 
 # Step 2. Data overview
 # Separte categorical & numerical features
@@ -49,6 +54,7 @@ for i in range(0, 3):
     plt.subplots_adjust(wspace = .5, hspace = .5)
 
 # Reorganzie mis-classified features if it's neccesssary
+
 
 # Step 3. Preprocessing
 # Categorical features
@@ -86,9 +92,7 @@ tr_te.loc[mask].head(20)
 
 # Duplication check with cols
 
-
 # Duplication check with rows
-
 
 # Shuffle check
 
@@ -97,8 +101,7 @@ tr_te.loc[mask].head(20)
 
 
 
-# Step 4. Additional feature engineering
-
+# Step 4. Feature engineering
 
 
 
@@ -112,3 +115,14 @@ X_train, X_val, y_train, y_val = train_test_split(X_train, y, test_size = .2, ra
 
 
 # Step 6. Modeling
+
+
+
+# Step 7. Evaluation
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score, roc_curve
+conf_matrix = confusion_matrix(actual, pred)
+print ("Classification report : \n", classification_report(actual, pred))
+print ("Accuracy : \n", accuracy_score(actual, pred))
+print ("AUC : ", roc_auc_score(actual, pred), "\n")
+
+fpr,tpr,thresholds = roc_curve(actual, pred[:,1])

@@ -1,4 +1,14 @@
 ####################### Importing Data #######################
+############# image
+# Load the image into an array: img
+img = plt.imread('480px-Astronaut-EVA.jpg')
+
+# Display the image
+plt.imshow(img)
+plt.imshow(img, extent = (-1,1,-1,1), aspect = 2)
+plt.axis('off')
+plt.show()
+
 ############# text
 file = open('moby_dick.txt', mode = 'r')
 print(file.read())
