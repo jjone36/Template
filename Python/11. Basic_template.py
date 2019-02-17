@@ -82,6 +82,7 @@ X_test = pca.transform(X_test)
 pca.components_
 pca.n_components_
 pca.mean_
+pca.explained_variance_ratio_     # explained-variance ratio
 
 features = range(pca.n_components_)
 plt.bar(features, pca.explained_variance_ratio_)
@@ -124,14 +125,7 @@ reg.score(X_test, y_test)
 
 plt.scatter(y_train, y_pred, color = 'red')
 plt.show()
-
 reg.predict(new_value = 6.5)
-
-# R2
-reg.score(X_test, y_test)
-# RMSE
-from sklearn.metrics import mean_squared_error
-np.sqrt(mean_squared_error(y_test, y_pred))
 
 ###### K-fold Cross Validaion
 from sklearn.model_selection import cross_val_score
@@ -139,6 +133,20 @@ cv_score = cross_val_score(estimator = reg, X, y, cv = 5, scoring = 'roc_auc')
 print(cv_score)
 cv_score.mean()    # mean accuracy value of validation sets
 cv_score.std()
+
+###### Stratified Cross Validation
+from sklearn.model_selection import StratifiedKfold
+skfolds = StratifiedKfold(n_splits = 5, random_state = 42)
+
+for tr_idx, te_idx in skfolds.split(X_train, y_train):
+    X_train_fold = X_train[tr_idx]
+    X_test_fold = X_train[te_idx]
+    y_train_fold = y_train[tr_idx]
+    y_test_fold = y_train[te_idx]
+
+    model.fit(X_train_fold, y_train_fold)
+    pred_fold = model.predict(X_test_fold)
+    print("Accuracy score: ", mean(pred_fold == y_test_fold))
 
 ############# 2) Regularized Regression #############
 ###### Elastic-Net
@@ -220,14 +228,7 @@ from sklearn.linear_model import LogisticRegression
 clas = LogisticRegression()
 clas.fit(X_train, y_train)
 y_pred = clas.predict(X_test)
-
-# Make the confusion matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test, y_pred)
-
 y_pred_prob = clas.predict_proba(X_test)[:, 1]
-from sklearn.metrics import roc_curve
-fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
 
 # decisiton boundary
 plot_decision_boundary(lambda x: clas.predict(x), X_test, y_test)
@@ -239,18 +240,19 @@ from sklearn.multiclass import OneVsRestClassifier
 clas = OneVsRestClassifier(LogisticRegression())
 
 ############# 2) Support Vector Machine #############
+from sklearn.svm import LinearSVR
+reg = LinearSVR(epsilon=1.)
+
 from sklearn.svm import SVR
-reg = SVR(kernel = 'rbf')     # non-linear SVM
+reg = SVR(kernel = 'rbf')
 reg.fit(X_train, y_train)
 y_pred = reg.predict(X_test)
 
-from sklearn.svm import SVC
-clas = SVC(kernel = 'linear')
-clas2 = SVC(kernel = 'rbf')        # kernel SVM
+from sklearn.svm import LinearSVC
+clas = LinearSVC(c = 1, losss = 'hinge')
 
-clas.fit(X_train, y_train)
-# Predict and print the label for the new data point X_new
-y_pred = clas.predict(X_test)
+from sklearn.svm import SVC
+clas = SVC(kernel = 'rbf')
 
 ############# 3) Naive Bayes Classification #############
 from sklearn.naive_bayes import GaussianNB
@@ -285,19 +287,11 @@ clas.fit(X_train, y_train)
 
 
 ############# 6) K-Nearest Neighbor #############
-(from sklearn.neighbors import KNeighborClassifier
-from sklearn.model_selection import train_test_split
-
-# Create a k-NN classifier with 6 neighbors
+from sklearn.neighbors import KNeighborClassifier
 clas = KNeighborsClassifier(n_neighbors = 6, metric = 'minkowski', p = 2)
-# Fit the classifier to the data
-clas.fit(X_train, y_train)
-# Predict and print the label for the new data point X_new
-y_pred = clas.predict(X_test)
-# Make the confusion matrix
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_test, y_pred)
 
+clas.fit(X_train, y_train)
+y_pred = clas.predict(X_test)
 
 #################################################
 ###### Clustering
@@ -402,34 +396,44 @@ plt.show()
 
 
 #################################################
-############# Evaluation Metrics #############
+############# Evaluation #############
 # Pearson correlation
 from scipy.stats import pearsonr
 correlation, pvalue = pearsonr(width, length)
+
 # R2
 r2 = reg.score(X_test, y_test)
 print("R-squred score: %f" % (r2))
+
 # RMSE
 from sklearn.metrics import mean_squared_error
 np.sqrt(mean_squared_error(y_test, y_pred))
-# accuracy
-metrics.accuracy_score(y_test, y_pred)
+
+
 # confusion matrix
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix, classification_report
 cm = confusion_matrix(y_test, y_pred, label = ['Spam', 'NoSpam'])
 classification_report(y_test, y_pred)
+
+# accuracy
+from sklearn.metircs import accuracy_score, precision_score, recall_score, f1_score
+accuracy_score(y_test, y_pred)
+precision_score(y_test, y_pred)     # How well the model detect the class
+recall_score(y_test, y_pred)        # How trustful the prediction is
+f1_score(y_test, y_pred)
+
 # ROC
 from sklearn.metrics import roc_curve, roc_auc_score
-fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+fpr, tpr, thres = roc_curve(y_test, y_pred)
 roc_auc_score(y_test, y_pred_prob)
 
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(x = fpr, y = tpr)
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('ROC Curve')
-plt.show()
+def plot_roc(fpr, tpr):
+    plt.plot(x = fpr, y = tpr, linewidth = 2)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
 
 
 ############# Grid Search #############
@@ -465,7 +469,7 @@ best_param = cv.best_params_
 print(best_param)
 
 
-############# Randomized Grid Search
+# Randomized Grid Search
 from sklearn.model_selection import RandomizedSearchCV
 cv = RandomizedSearchCV(estimator = clas,
                         param_distributions = myParam,

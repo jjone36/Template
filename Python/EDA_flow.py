@@ -101,11 +101,19 @@ tr_te.loc[mask].head(20)
 
 
 
-# Step 4. Feature engineering
+# covariance matrix plot (heatmap)
+sns.heatmap(df.corr())
+
+###### Step 4. Feature engineering
 
 
+# Mean encoding
+tr_y = pd.concat([tr, y], axis = 1)
+means_map = tr_y.groupby(col).target.mean()
+tr[col + '_mean_target'] = tr[col].map(means)
 
-# Step 5. Split into train, valid, test
+
+###### Step 5. Split into train, valid, test
 X_train = tr_te[:a, :]
 X_test = tr_te[a:, :]
 del tr_te
@@ -114,15 +122,30 @@ from sklearn.model_selection import train_test_split
 X_train, X_val, y_train, y_val = train_test_split(X_train, y, test_size = .2, random_state = 36)
 
 
-# Step 6. Modeling
+###### Step 6. Modeling
 
 
 
-# Step 7. Evaluation
+###### Step 7. Evaluation
+# Regression
+
+
+# Classification
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score, roc_curve
 conf_matrix = confusion_matrix(actual, pred)
 print ("Classification report : \n", classification_report(actual, pred))
 print ("Accuracy : \n", accuracy_score(actual, pred))
 print ("AUC : ", roc_auc_score(actual, pred), "\n")
 
-fpr,tpr,thresholds = roc_curve(actual, pred[:,1])
+fpr, tpr, thres = roc_curve(actual, pred[:,1])
+
+def plot_roc(fpr, tpr):
+    plt.plot(x = fpr, y = tpr, linewidth = 2)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+
+plot_roc(fpr, tpr)
+plt.show()
