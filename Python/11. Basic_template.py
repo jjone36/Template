@@ -1,8 +1,6 @@
 'https://scikit-learn.org/stable/index.html'
 'https://campus.datacamp.com/courses/machine-learning-with-the-experts-school-budgets'
 #################################################
-cd C:\Users\jjone\Anaconda3\Scripts
-pip3 install ~~~
 ############# Data Preprocessing #############
 import pandas as pd
 import numpy as np
@@ -282,10 +280,14 @@ reg = RandomForestRegressor(n_estimators = 100, max_depth = 5)
 reg.fit(X_train, y_train)
 
 from sklearn.ensemble import RandomForestClassifier
-clas = RandomForestClassifier(criterion = 'entropy', n_estimators = 100, max_depth = 5)
+clas = RandomForestClassifier(criterion = 'entropy', n_estimators = 100, max_depth = 5, n_jobs = -1)
 clas.fit(X_train, y_train)
 
-
+pred = []
+for tree in clas.estimators_:
+    pred.append(tree.predict_proba(X_val)[None, :])
+pred = np.vstack(pred)
+np.cumsum(pred, axis=0)/np.arange(1, pred.shape[0] + 1)[:, None, None]
 ############# 6) K-Nearest Neighbor #############
 from sklearn.neighbors import KNeighborClassifier
 clas = KNeighborsClassifier(n_neighbors = 6, metric = 'minkowski', p = 2)

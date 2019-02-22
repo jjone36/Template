@@ -2,3 +2,5 @@
 *.json
 *.csv
 install_packages.R
+.ipynb_checkpoints
+__pycache__
