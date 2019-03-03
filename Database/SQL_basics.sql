@@ -1,5 +1,5 @@
-https://classroom.udacity.com/courses/ud198
-########################### Basic
+-- https://classroom.udacity.com/courses/ud198
+------------ Basic
 SELECT names
 FROM accounts
 WHERE name LIKE 'c%'
@@ -26,7 +26,7 @@ FROM web_events
 WHERE channel IN ('organic', 'adwords') OR occurred_at BETWEEN '2016-01-01' AND '2017-01-01'
 ORDER BY occurred_at DESC;
 
-########################### join_
+------------ join_
 SELECT orders.*, accounts.*
 FROM accounts
 JOIN orders
@@ -72,7 +72,7 @@ JOIN account a
 ON w.account_id = a.id
 WHERE w.account_id = '1001';
 
-########################### aggregation
+------------ aggregation
 SELECT SUM(poster_qty) AS total_poster_sales
 FROM orders;
 
@@ -103,7 +103,41 @@ GROUP BY s.id, s.name
 HAVING COUNT(*) > 5
 ORDER BY num_accounts;
 
-########################### times
+
+-- percentile_disc(~~) WITHIN GROUP (ORDER BY ~~)
+SELECT sector, avg(assets) AS mean,
+       percentile_disc(.5) WITHIN GROUP (ORDER BY assets) AS median
+  FROM fortune500
+ GROUP BY sector
+ ORDER BY mean;
+
+
+-- CASE WHEN ~~ THEN ~~ ELSE ~~ END
+SELECT a.name, sum(o.total_amt_usd) AS total_sales,
+       CASE WHEN sum(o.total_amt_usd) > 200000 THEN 'Level 1'
+       WHEN sum(o.total_amt_usd) BETWEEN 100000 AND 2000000 THEN 'Level 2'
+       ELSE 'Level 3' END AS level
+FROM orders o
+JOIN accounts a
+ON a.id = o.account_id
+WHERE date_part('year', occurred_at) BETWEEN 2016 AND 2017
+GROUP BY a.name
+ORDER BY 2 DESC;
+
+SELECT s.name AS sales_rep_name, count(*) AS nums, sum(o.total),
+       CASE WHEN count(*) > 200 OR sum(o.total) > 750000 THEN 'top'
+            WHEN count(*) > 150 OR sum(o.totaORl) > 500000 THEN 'middle'
+            ELSE 'low' END AS groups
+FROM sales_reps s
+JOIN accounts a
+ON s.id = a.sales_rep_id
+JOIN orders o
+ON o.account_id = a.id
+GROUP BY s.name
+ORDER BY 4 DESC;
+
+
+------------ times
 SELECT DATE_PART('year', occurred_at) ord_year,  SUM(total_amt_usd) total_spent
 FROM orders
 GROUP BY 1
@@ -118,93 +152,89 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 1;
 
-########################### case_statements
-"CASE WHEN ~~ THEN ~~ ELSE ~~ END"
-select a.name, sum(o.total_amt_usd) as total_sales,
-       case when sum(o.total_amt_usd) > 200000 then 'Level 1'
-       when sum(o.total_amt_usd) between 100000 and 2000000 then 'Level 2'
-       else 'Level 3' end as level
-from orders o
-join accounts a
-on a.id = o.account_id
-where date_part('year', occurred_at) between 2016 and 2017
-group by a.name
-order by 2 desc;
+-------------------------------------------------------------------------------
+------------ Sub-query
+SELECT channel, avg(num)ORDER
+FROM
+    (SELECT date_trunc('day', occurred_at) AS day, channel, count(*) AS num
+    FROM web_events
+GROUP BY 1, 2) AS sub
+GROUP BY channel
+ORDER BY 2;
 
-select s.name as sales_rep_name, count(*) as nums, sum(o.total),
-       case when count(*) > 200 or sum(o.total) > 750000 then 'top'
-            when count(*) > 150 or sum(o.total) > 500000 then 'middle'
-            else 'low' end as groups
-from sales_reps s
-join accounts a
-on s.id = a.sales_rep_id
-join orders o
-on o.account_id = a.id
-group by s.name
-order by 4 desc;
+SELECT avg(standard_qty) avg_standard, sum(total_amt_usd)
+FROM orders
+WHERE date_trunc('month', occurred_at) =
+    (SELECT date_trunc('month', occurred_at)
+    FROM orders
+    ORDER BY 1
+    LIMIT 1);
 
-########################### Sub-query
-select channel, avg(num)
-from
-    (select date_trunc('day', occurred_at) as day, channel, count(*) as num
-    from web_events
-group by 1, 2) as sub
-group by channel
-order by 2;
 
-select avg(standard_qty) avg_standard, sum(total_amt_usd)
-from orders
-where date_trunc('month', occurred_at) =
-    (select date_trunc('month', occurred_at)
-    from orders
-    order by 1
-    limit 1);
+------------ with_
+WITH t1 AS (SELECT s.name sales_name, r.name region_name, sum(o.total_amt_usd) sum
+FROM orders o
+JOIN accounts a
+ON o.account_id = a.id
+JOIN sales_reps s
+ON s.id = a.sales_rep_id
+JOIN region r
+ON r.id = s.region_id
+GROUP BY 1, 2
+ORDER BY 3),
 
-########################### with_
-'https://classroom.udacity.com/courses/ud198/lessons/b50a9cfd-566a-4b42-bf4f-70081b557c0b/concepts/a4ea6477-dbb6-4890-ac82-ad19f60cc3c5'
-with t1 as (select s.name sales_name, r.name region_name, sum(o.total_amt_usd) sum
-from orders o
-join accounts a
-on o.account_id = a.id
-join sales_reps s
-on s.id = a.sales_rep_id
-join region r
-on r.id = s.region_id
-group by 1, 2
-order by 3),
+    t2 AS (SELECT region_name, max(sum) max
+    FROM t1
+    GROUP BY region_name)
 
-    t2 as (select region_name, max(sum) max
-    from t1
-    group by region_name)
+SELECT t1.sales_name, t2.region_name, t2.max
+FROM t1
+JOIN t2
+ON t1.region_name = t2.region_name
+WHERE t1.sum = t2.max;
+-- https://classroom.udacity.com/courses/ud198/lessons/b50a9cfd-566a-4b42-bf4f-70081b557c0b/concepts/a4ea6477-dbb6-4890-ac82-ad19f60cc3c5
 
-select t1.sales_name, t2.region_name, t2.max
-from t1
-join t2
-on t1.region_name = t2.region_name
-where t1.sum = t2.max;
 
-#################################################################################
-## LEFT / RIGHT / UPPER / LOWER / CONCAT / REPLACE / SUBSTR / COALESCE
-with t1 as (SELECT name,
-        CASE WHEN left(name, 1) in ('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
+------------ Temporary Tables
+DROP TABLE IF EXISTS top_compaines;
+
+CREATE TEMP TABLE top_compaines AS
+SELECT rank, title
+FROM fortune500
+WHERE rank <= 10;
+    -- same
+INSERT INTO top_compaines
+SELECT rank, title
+FROM fortune500
+WHERE rank BETWEEN 11 AND 20;
+    --
+SELECT *
+FROM top_compaines;
+
+-------------------------------------------------------------------------------
+-- LEFT / RIGHT / UPPER / LOWER
+WITH t1 AS (SELECT name,
+        CASE WHEN left(name, 1) IN ('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
         THEN 1 ELSE 0 END AS vowel, count(*) num
 FROM accounts
-group by 1, 2)
+GROUP BY 1, 2)
 
-select vowel, sum(vowel), sum(num)
-from t1
-group by vowel;
+SELECT vowel, sum(vowel), sum(num)
+FROM t1
+GROUP BY vowel;
 
+--
+WITH t1 AS (SELECT replace(name, ' ', '') AS company,
+        left(primary_poc, strpos(primary_poc, ' ')) AS first,
+        left(primary_poc, -strpos(primary_poc, ' ')) AS last
+        FROM accounts)
 
-with t1 as (select replace(name, ' ', '') as company,
-        left(primary_poc, strpos(primary_poc, ' ')) as first,
-        left(primary_poc, -strpos(primary_poc, ' ')) as last
-        from accounts)
+SELECT concat(first, '.', last, '@', company, '.com') AS address
+FROM t1
 
-select concat(first, '.', last, '@', company, '.com') as address
-from t1
+-- CONCAT / REPLACE / SUBSTR / COALESCE
+SELECT date,
+   concat(SUBSTR(date, 7, 4), '-', left(date, 2), '-', substr(date, 4, 2))::date AS date_2
+FROM sf_crime_data
 
-
-select date,
-   concat(SUBSTR(date, 7, 4), '-', left(date, 2), '-', substr(date, 4, 2))::DATE date_2
-from sf_crime_data
+-------------------------------------------------------------------------------

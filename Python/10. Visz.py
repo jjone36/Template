@@ -123,8 +123,8 @@ sns.palplot(sns.color_palette("Purples", 8))   # husl
 # geom_point()
 plt.scatter(auto['weight'], auto['mpg'], color = 'red', label = 'data')
 sns.regplot(x = 'weight', y = 'mpg', data = auto, color = 'blue', scatter = None, label = 'Order 1')
-sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'cyl')
-
+(sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'cyl')
+)
 # geom_smooth(method = 'lm', se = F)
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, col = 'cyl')
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, hue = 'origin', palette = 'Set1')
@@ -157,86 +157,52 @@ sns.heatmap(df_crosstab, annot = True, fmt = 'd', cmap = 'YlGnBu', cbar = False,
 
 #####################################################################
 ####################### Plotly
-# https://plot.ly/python/
-# https://dash.plot.ly/dash-core-components
-# https://www.kaggle.com/pavanraj159/telecom-customer-churn-prediction
-
-from plotly.offline import init_notebook_mode, iplot
-init_notebook_mode(connected=True)
+import plotly
+import plotly.offline as pyo
 import plotly.graph_objs as go
 
-# Scatter plot
-trace_1 = go.Scatter(x = df.age, y = df.height, mode = 'markers')
-trace_2 = go.Scatter(x = df.age, y = df.weight, mode = 'markers')
-data = [trace_1, trace_2]
-iplot(data)
+# notebook mode
+#from plotly.offline import init_notebook_mode, iplot
+#init_notebook_mode(connected=True)
 
-# line plot
-trace_1 = go.Scatter(x = df.date, y = df.price, name = 'Price',
-                     line = dict(color = '#4976bc'), opacity = .5)
+trace = go.Scatter(x = df.X, y = df.Y,
+                   mode = 'markers',
+                   marker = dict(size = 10,
+                                color = 'rgba(51, 204, 153, .7)',
+                                symbol = 'pentagon',
+                                line = {'width':1}))
 
-# Bar plot
-trace_1 = go.Bar(x = df.age, y = df.height, name = 'Height',
-                marker = {line = {width : .5, color : 'black'}}, opacity = .5)
-trace_2 = go.Bar(x = df.age, y = df.weight, name = 'Weight')
-data = [trace_1, trace_2]
-layout = go.Layout(title = 'Height & Weight', barmode = 'group')
+layout = go.Layout(title = 'Item Plot',
+                   xaxis = dict(title = 'X-values',
+                                range = [-100, 100],
+                                titlefont=dict(family='Arial, sans-serif',
+                                                size=18,
+                                                color='lightgrey')),
+                   yaxis = dict(title = 'Y-values',
+                                range = [-100, 100],
+                                titlefont=dict(family='Arial, sans-serif',
+                                                size=18,
+                                                color='lightgrey')),
+                   hovermode = 'closest')
 
-fig = go.Figure(data, layout)
-iplot(fig)
+fig = go.Figure(data = [trace], layout = layout)
+pyo.plot(data)
 
-# Histogram
-trace = go.Histogram(x = df.Survived, histnorm = 'percent', name = 'Survived rate',
+####################### line plot
+trace = go.Scatter(x = df.X, y = df.Y,
+                   mode = 'lines',
+                   line = dict(width = 3))
+
+####################### Bar plot
+trace = go.Bar(x = df.X, y = df.Y,
+               marker = dict(line = {'width' : .5,
+                                     'color' : 'black'}))
+
+layout = go.Layout(title = 'barchart', barmode = 'stack')
+
+####################### Histogram
+trace = go.Histogram(x = df.X, histnorm = 'percent',
                     marker = {line = {width : .5, color : 'black'}}, opacity = .6)
-
-# Pie plot
-labs = df.embarked.value_counts().keys().tolist()
-vals = df.embarked.value_counts().values.tolist()
-trace = go.Pie(labels = labs, values = vals, hole = .4, name = 'Embarked')
-
-
-# 3D Scatter
-x = df.numGroups
-y = df.maxPlace
-z = df.killPlace
-trace = go.Scatter3d(x = x, y = y, z = z,
-                    mode = 'markers',
-                    marker = dict(size = 12, color = z, opacity = .5))
-
-data = [trace]
-layout = go.Layout(margin = dict(l = 0, r = 0, b = 0, t = 0))
-
-
-# Maps
-import shapely
-import shapefile
-from plotly.figure_factory._county_choropleth import create_choropleth
-import geopandas
-
-colorscale = ["#171c42","#223f78","#1267b2","#4590c4","#8cb5c9","#b6bed5","#dab2be",
-"#d79d8b","#c46852","#a63329","#701b20","#3c0911"]
-
-values = df.TOT_POP.tolist()
-fips = df.FIPS.tolist()
-
-fig = create_choropleth(scope = scope, values = values, fips = fips,
-                        round_legend_values = True,
-                        # show_state_data = True,
-                        simplify_county = 0,
-                        simplify_state = 0,
-                        county_outline = {'color': 'rgb(15, 15, 55)', 'width': .5},
-                        state_outline = {'width' : .5},
-                        legend_title = 'Population Per Country')
-iplot(fig, filename = 'Choropleth Map')
-
-
-# Polar plot
-r = df.Survived.values.tolist()
-theta = df.Embarked.tolist()
-trace = go.Scatterpolar(r = r, theta = theta, name = "Embarked vs Survive",
-                        fill  = "toself", mode = "markers+lines",
-                        marker = dict(size = 5))
-
 
 #####################################################################
 ####################### Bokeh
