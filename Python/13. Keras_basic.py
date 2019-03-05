@@ -100,6 +100,12 @@ for lr in lr_to_test:
 
 ##############################################################
 ############# Convolutional Neural Networks #############
+from keras.preprocessing import image
+img = image.load_img(filename, target_size = (64, 64))
+img = image.img_to_array(img)
+img.shape
+img = np.expand_dims(img, axis = 0)
+
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, BatchNormalization
 
@@ -146,14 +152,25 @@ model.summary()
 model.fit(X_train, y_train, epochs = 10, batch_size = 64, validation_split = .2, verbose = True)
 model.evaluate(x = X_dev, y = y_dev)
 
+from sklearn.metrics import classification_report
+pred = model.predict_classes(x_test)
+print(classification_report(y_test, pred))
+
 ########################## image data preprocessing
 from keras.preprocessing.image import ImageDataGenerator
+train_dir
+test_dir
+
 train_gen = ImageDataGenerator(rescale=1./255,
                                shear_range=0.2,
                                zoom_range=0.2,
-                               horizontal_flip=True)
-train_generator = train_gen.flow_from_directory(dir,
-                                                target_size=(64, 64),
+                               horizontal_flip=True,
+                               rotation_range = 30,
+                               width_shift_range = .1, height_shift_range = .1,
+                               fill_mode = 'nearest')
+train_gen.class_indices
+train_generator = train_gen.flow_from_directory(train_dir,
+                                                target_size= im_size,
                                                 batch_size=32,
                                                 class_mode='binary')
 
@@ -165,11 +182,11 @@ val_generator = val_gen.flow_from_dataframe(val_df, dir,
                                             batch_size= batch_size)
 
 history = model.fit_generator(train_generator,
-                    epochs = 50,
-                    validation_data = val_generator,
-                    Gvalidation_steps = val_df.shape[0] // batch_size,
-                    steps_per_epoch= train_df.shape[0] // batch_size,
-                    callbacks = callbacks)
+                                epochs = 50,
+                                validation_data = val_generator,
+                                validation_steps = val_df.shape[0] // batch_size,
+                                steps_per_epoch= train_df.shape[0] // batch_size,
+                                callbacks = callbacks)
 
 # model_saving
 model.save('model_file.h5')
@@ -177,6 +194,11 @@ model.save('model_file.h5')
 # prediction
 # Augmentation with test set
 test_gen = ImageDataGenerator(rescale=1./255)
+train_generator = train_gen.flow_from_directory(test_dir,
+                                                target_size= im_size,
+                                                batch_size=32,
+                                                class_mode='binary')
+
 test_generator = test_gen.flow_from_dataframe(test_df, dir,
                                               x_col='filename',
                                               y_col='category',
