@@ -137,24 +137,9 @@ GROUP BY s.name
 ORDER BY 4 DESC;
 
 
------------- times
-SELECT DATE_PART('year', occurred_at) ord_year,  SUM(total_amt_usd) total_spent
-FROM orders
-GROUP BY 1
-ORDER BY 2 DESC;
-
-SELECT DATE_TRUNC('month', o.occurred_at) ord_date, SUM(o.gloss_amt_usd) tot_spent
-FROM orders o
-JOIN accounts a
-ON a.id = o.account_id
-WHERE a.name = 'Walmart'
-GROUP BY 1
-ORDER BY 2 DESC
-LIMIT 1;
-
 -------------------------------------------------------------------------------
 ------------ Sub-query
-SELECT channel, avg(num)ORDER
+SELECT channel, avg(num)
 FROM
     (SELECT date_trunc('day', occurred_at) AS day, channel, count(*) AS num
     FROM web_events
@@ -212,6 +197,16 @@ SELECT *
 FROM top_compaines;
 
 -------------------------------------------------------------------------------
+-- NULL
+SELECT *
+FROM Incidents
+WHERE IncidentState IS NOT NULL;
+
+SELECT IncidentState, ISNULL(IncidentState, City) AS Location
+FROM Incidents
+WHERE IncidentState IS NULL;
+
+
 -- LEFT / RIGHT / UPPER / LOWER
 WITH t1 AS (SELECT name,
         CASE WHEN left(name, 1) IN ('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
@@ -237,4 +232,62 @@ SELECT date,
    concat(SUBSTR(date, 7, 4), '-', left(date, 2), '-', substr(date, 4, 2))::date AS date_2
 FROM sf_crime_data
 
+
+-- trim
+SELECT distinct street,
+       trim(street, '0123456789 #/.') AS cleaned_street
+  FROM evanston311
+ ORDER BY street;
+
+SELECT ltrim(concat(house_num, ' ', street)) AS address
+  FROM evanston311;
+
+-- split_part(string_to_split, delimiter, part_number)
+SELECT split_part(street, ' ', 1) AS street_name,
+      count(*)
+ FROM evanston311
+GROUP BY 1
+ORDER BY count DESC
+LIMIT 20;
+
+-- update
+UPDATE recode SET standardized='Trash Cart'
+ WHERE standardized LIKE 'Trash%Cart';
+
+UPDATE recode SET standardized='Snow Removal'
+ WHERE standardized LIKE 'Snow%Removal%';
+
 -------------------------------------------------------------------------------
+------------ times
+SELECT DATE_PART('year', occurred_at) ord_year, SUM(total_amt_usd) total_spent
+FROM orders
+GROUP BY 1
+ORDER BY 2 DESC;
+
+SELECT DATE_TRUNC('month', o.occurred_at) ord_date, SUM(o.gloss_amt_usd) tot_spent
+FROM orders o
+JOIN accounts a
+ON a.id = o.account_id
+WHERE a.name = 'Walmart'
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1;
+
+-- interval
+SELECT now() + '100 days'::interval;
+SELECT EXTRACT (MONTH FROM now());
+
+-- generate_series(from, to, interval)
+SELECT day
+FROM (SELECT generate_series(min(date_created),
+                             max(date_created),
+                             '1 day')::date AS day
+      FROM evanston311) AS all_dates
+WHERE day NOT IN (SELECT date_created::date FROM evanston311);
+
+
+-- lead & lag
+SELECT date,
+      lag(date) OVER (ORDER BY date),
+      lead(date) OVER (ORDER BY date)
+FROM sales;
