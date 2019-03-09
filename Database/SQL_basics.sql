@@ -211,8 +211,8 @@ WHERE IncidentState IS NULL;
 WITH t1 AS (SELECT name,
         CASE WHEN left(name, 1) IN ('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
         THEN 1 ELSE 0 END AS vowel, count(*) num
-FROM accounts
-GROUP BY 1, 2)
+        FROM accounts
+        GROUP BY 1, 2)
 
 SELECT vowel, sum(vowel), sum(num)
 FROM t1
@@ -273,6 +273,13 @@ GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 1;
 
+-- DATEADD(DD, 5, '2019-03-08'). DATEDIFF(MM, '2019-05-08', '2019-03-08')
+SELECT OrderDate, DATEADD(DD, 5, shipDate) AS DeliveryDate
+FROM Shipments
+
+SELECT DATEDIFF(dd, date_created, date_completed) as Duration
+FROM shipments;
+
 -- interval
 SELECT now() + '100 days'::interval;
 SELECT EXTRACT (MONTH FROM now());
@@ -286,8 +293,24 @@ FROM (SELECT generate_series(min(date_created),
 WHERE day NOT IN (SELECT date_created::date FROM evanston311);
 
 
+SELECT seconds
+ROUND(seconds, 0) AS round_zero_sec
+ROUND(seconds, 1) AS round_one_secLE
+FROM incidents;
+
+-------------------------------------------------------------------------------
+-- DECLARE, SET
+DECLARE @snack VARCHAR(10)
+SELECT @snack = 'cookies'
+
+-- window function
+SELECT OrderID, TerritoryName,
+       ROW_NUMBER() OVER(PARTITION BY TerritoryName ORDER BY OrderPrice) AS TotalPrice
+       FIRST_VALUE(OrderPrice) OVER(PARTITION BY TerritoryName ORDER BY OrderPrice) AS TotalPrice
+FROM Orders
+
 -- lead & lag
 SELECT date,
-      lag(date) OVER (ORDER BY date),
-      lead(date) OVER (ORDER BY date)
+      LAG(date) OVER (ORDER BY date), 
+      LEAD(date) OVER (ORDER BY date)
 FROM sales;
