@@ -59,13 +59,18 @@ model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = [
 from keras.callbacks import EarlyStopping
 early_stopper = EarlyStopping(patience = 5)
 
-model.fit(X_train, y_train, batch_size = 10, nb_epoch = 100, callbacks = [early_stopper])   # validation_split
+r = model.fit(X_train, y_train, batch_size = 10, nb_epoch = 100, callbacks = [early_stopper])   # validation_split
 y_pred = model.predict(X_test)
 
 # plot the error
-history = training.history
-plt.plot(history['loss'])
-plt.plot(history['val_loss'])
+plt.plot(r.history['loss'], label = 'train loss')
+plt.plot(r.history['val_loss'], label = 'test loss')
+plt.legend()
+plt.show()
+
+plt.plot(r.history['mean_squared_error'], label = 'train mse')
+plt.plot(r.history['val_mean_squared_error'], label = 'test mse')
+plt.legend()
 plt.show()
 
 

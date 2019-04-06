@@ -292,6 +292,7 @@ acc = evaluator.evaluate(pred)
 
 
 #####################################################################
+# https://www.datacamp.com/courses/recommendation-engines-in-pyspark
 ############# Collaborative Filtering
 mo.printSchema()
 mo = mo.select(mo.UserId.cast('integer'), mo.MovieId.cast('integer'), mo.rating.cast('double'))

@@ -62,6 +62,7 @@ sns.boxplot(x, y, data)
 plt.hist(df['x'])
 df['x'].plot.hist()
 sns.distplot(df['x'], kde = False, bins = 30)
+sns.kdeplot(df['x'], label, shade = True)
 
 # geom_bar()
 df.plot(x, y, kind = 'barh')
@@ -123,8 +124,8 @@ sns.palplot(sns.color_palette("Purples", 8))   # husl
 # geom_point()
 plt.scatter(auto['weight'], auto['mpg'], color = 'red', label = 'data')
 sns.regplot(x = 'weight', y = 'mpg', data = auto, color = 'blue', scatter = None, label = 'Order 1')
-(sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'cyl')
-)
+sns.lmplot(x = 'weight', y = 'mpg', data = auto, row = 'cyl')
+
 # geom_smooth(method = 'lm', se = F)
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, col = 'cyl')
 sns.lmplot(x = 'weight', y = 'mpg', data = auto, hue = 'origin', palette = 'Set1')
