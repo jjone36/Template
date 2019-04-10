@@ -341,7 +341,6 @@ random.shuffle([1, 2, 3, 4, 5, 6, 7])
 random.sample([1, 2, 3, 4, 5], 3)   # choose 3 elements
 
 
-
 ####################### functions #######################
 def three_shouts(X1, X2, X3):
     # nested function

@@ -90,7 +90,7 @@ p.map_diag()
 p.map_offdiag()
 
 # PairPlot: ggpairs()
-sns.pairplot(df, vars = [], palette = 'husl', plot_kws = {'alpha': .5})
+sns.pairplot(df, vars = [])
 sns.pairplot(df, x_vars, y_vars, hue = 'origin', kind = 'reg', diag_kind = 'kde')   # diag_kws
 
 # JointGrid: joint distributions

@@ -67,6 +67,11 @@ normalizer = normalizer(X)
 df.time = pd.to_datetime(df.time)
 df['mnoth'] = df.time.apply(lambda row: row.month)
 
+# MultiLabelBinarizer
+# https://stackoverflow.com/questions/45312377/how-to-one-hot-encode-from-a-pandas-column-containing-a-list
+
+
+
 # Split the dataset
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .2, random_state = 42)
@@ -392,10 +397,31 @@ plt.show()
 xgb.plot_importance(xg_reg)
 plt.show()
 
-############# 2) CatBoosting #############
-############# 3) LightBoosting #############
+############# 2) Catboost #############
+from catboost import CatBoostClassifier
+cat_idx
+clas = CatBoostClassifier(iterations = 2,
+                          depth = 2,
+                          learning_rate = 0.1,
+                          loss_function = 'Logloss',
+                          logging_level = 'Silent',
+                          plot = True)
+clas.fit(X_tr, y_tr, cat_features = cat_idx,
+        eval_set = (X_val, y_val))
 
+from grader_v2 import Grader
+grader = Grader()
+mean = 0
+grader.submit_tag('logloss_mean', mean)
 
+############# 3) LightGBM #############
+import lightgbm as lgb
+
+train_data = lgb.Dataset(X_tr, label = y_tr)
+param = {'num_leaves':150, 'objective':'binary', 'max_depth':7, 'learning_rate':.05,'max_bin':200}
+param['metric'] = ['auc', 'binary_logloss']
+lgbm = lgb.train(param, train_data, 50)
+pred = lgbm.predict(X_te)
 
 #################################################
 ############# Evaluation #############
@@ -483,6 +509,34 @@ print(cv.best_score_)
 print(cv.best_params_)
 
 #################################################
+############# Ensemble #############
+# bagging - changing seed & averaging
+n_bags = 10
+seed = 1
+
+bagged_pred = np.zeros(test.shape[0])
+for i in range(n_bags):
+    model.set_params(random_state = seed + i)
+    model.fit(tr_X, y)
+    preds = model.predict(te)
+    bagged_pred += preds
+bagged_pred /= n_bags
+
+# stacking
+# prediction on the valid set
+valid_pred_1 = model_1.predict(valid)
+valid_pred_2 = model_2.predict(valid)
+stacked_valid = np.column_stack((valid_pred_1, valid_pred_2))
+
+# prediction on the test set
+te_pred_1 = model_1.predict(te)
+te_pred_2 = model_2.predict(te)
+stacked_te = np.column_stack((te_pred_1, te_pred_2))
+
+# final prediction
+meta_model.fit(stacked_valid, y_val)
+final_pred = meta_model.predict(stacked_te)
+
 ############# Variable Selection functions #############
 # Building the optimal model using Backward Eliminations
 import statsmodels.formula.api as sm

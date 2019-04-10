@@ -6,19 +6,23 @@ import os
 
 # Step 0. Understand the data (Please don't skip it)
 
+
+
 # Step 1. Import the dataset
 tr = pd.read_csv('train.csv')
 te = pd.read_csv('test.csv')
 
 tr.head()
-y = tr.target
-X_tr = tr.drop('target', axis = 1)
 
 # Data overview
 print("Data types : \n" , tr.info())
 print("\nUnique values :  \n", tr.nunique())
 print("\nMissing values :  ", tr.isnull().sum())
 tr.fillna('NaN', inplace = True)
+
+# Concat train and test set
+cut = len(tr)
+tr_te = pd.concat([tr, te], axis = 0)
 
 # Separate categorical & numerical features
 cat_feats = tr_te.column[tr_te.dtypes == 'object']
@@ -29,26 +33,19 @@ print("Numeric variables ", len(num_feats), num_feats)
 
 # Reorganzie mis-classified features if it's neccesssary
 
-# Concat train and test set
-a = len(tr)
-tr_te = pd.concat([tr, te], axis = 0)
-
 # Drop the unnecessary features
 drop_feats = []
 tr_te = tr_te.drop(drop_feats, axis = 1)
 
+
+
+
 # Step 2. Preprocessing
 # Separate categorical & numerical features
-cat_feats = tr_te.columns[tr_te.dtypes == 'object']
-num_feats = tr_te.columns[tr_te.dtypes != 'object']
-
 df_cat = tr_te[cat_feats]
 df_num = tr_te[num_feats[:-1]]
 
 # 2-1. Numerical features
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-
 # Distributions of numeric features
 fig, axes = plt.subplots(nrows = 3, figsize = (10, 5))    # change the nrows, ncols accordingly
 for i in range(0, 3):
@@ -67,6 +64,10 @@ tr_te = tr_te.drop(const_feats, axis = 1)
 n_unique = tr_te.nunique(dropna = False)
 plt.hist(n_unique.astype(flaot) / tr_te.shape[0], bins = 100)
 
+# Scaling
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
 
 # 2-2. Categorical features
 from sklearn.preprocesing import LabelEncoder
@@ -75,6 +76,12 @@ encoder = LabelEncoder()
 for i in cat_feats:
     tr_te[i] = encoder.fit_transform(tr_te[i])
     tr_te[cat_feats].T.drop_duplicates()
+
+
+from sklearn.preprocessing import MultiLabelBinarizer
+mlb = MultiLabelBinarizer()
+df_oh = mlb.fit_transform(tr['col']).astype('int')
+df_oh = pd.DataFrame(X, columns = mlb.classes_)
 
 
 # Time features
@@ -88,9 +95,10 @@ import datatime as dt
 # https://scikit-learn.org/stable/auto_examples/bicluster/plot_spectral_biclustering.html
 
 
+
+
+
 # Step 3. Visualization
-
-
 # Investigate features with lots of values
 plt.hist(n_unique.astype('float')/tr_te.shape[0], bins = 50)
 
@@ -101,16 +109,18 @@ tr_te.loc[mask].head(20)
 # covariance matrix plot (heatmap)
 sns.heatmap(df.corr())
 
-###### Step 4. Feature engineering
 
 
+# Step 4. Feature engineering
 # Mean encoding
 tr_y = pd.concat([tr, y], axis = 1)
 means_map = tr_y.groupby(col).target.mean()
 tr[col + '_mean_target'] = tr[col].map(means)
 
 
-###### Step 5. Split into train, valid, test
+
+
+# Step 5. Split into train, valid, test
 X_train = tr_te[:a, :]
 X_test = tr_te[a:, :]
 del tr_te
@@ -119,14 +129,14 @@ from sklearn.model_selection import train_test_split
 X_train, X_val, y_train, y_val = train_test_split(X_train, y, test_size = .2, random_state = 36)
 
 
-###### Step 6. Modeling
+# Step 6. Modeling
 # Baseline
 
 
 
 
 
-###### Step 7. Evaluation
+# Step 7. Evaluation
 # Regression
 
 
