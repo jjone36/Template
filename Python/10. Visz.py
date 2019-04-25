@@ -7,6 +7,9 @@ import seaborn as sns
 iris.plot(kind = 'scatter', x = 'Sepal_Length', y = 'Sepal_Width')
 iris['Speices'].plot(subplots = True, title = 'Iris Species')
 
+# ax.axvline()
+# ax.axvspan('1900-01-01', '2000-01-01', color= 'red', alpha= 0.3))
+
 plt.xlabel('Iris Sepal Length')
 plt.ylabel('Iris Sepal Width')
 plt.title('Iris Plot')
@@ -113,6 +116,7 @@ plt.style.use('ggplot')
 plt.savefig('plot1.png')
 
 ####################### Seaborn
+print(sns.style.available)
 # set default Seaborn style
 sns.set()
 sns.set_style('whitegird')   # dark, white
@@ -151,6 +155,8 @@ sns.violinplot(x = 'cyl', y = 'hp', data = auto, inner = None,  palette = 'husl'
 
 # covariance matrix plot (heatmap)
 sns.heatmap(df.corr())
+sns.clustermap(df.corr(), annot = True,
+               annot_kws = {"size": 4}, linewidths = .4, figsize = (15, 10))
 
 df_crosstab = pd.corsstab(df['weight'], df['height'], values = df['hp'], aggfunc = 'mean'))
 sns.heatmap(df_crosstab, annot = True, fmt = 'd', cmap = 'YlGnBu', cbar = False,

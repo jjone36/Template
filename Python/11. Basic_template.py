@@ -69,8 +69,10 @@ df['mnoth'] = df.time.apply(lambda row: row.month)
 
 # MultiLabelBinarizer
 # https://stackoverflow.com/questions/45312377/how-to-one-hot-encode-from-a-pandas-column-containing-a-list
-
-
+mlb = MultiLabelBinarizer()
+X = mlb.fit_transform(df.genres).astype('int')
+mlb.classes_
+df_genres = pd.DataFrame(X, columns = mlb.classes_)
 
 # Split the dataset
 from sklearn.model_selection import train_test_split
@@ -280,7 +282,7 @@ clas.fit(X_train, y_train)
 
 
 ############# 5) Random Forest #############
-from sklearn.tree import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 reg = RandomForestRegressor(n_estimators = 100, max_depth = 5)
 reg.fit(X_train, y_train)
 
@@ -293,6 +295,7 @@ for tree in clas.estimators_:
     pred.append(tree.predict_proba(X_val)[None, :])
 pred = np.vstack(pred)
 np.cumsum(pred, axis=0)/np.arange(1, pred.shape[0] + 1)[:, None, None]
+
 ############# 6) K-Nearest Neighbor #############
 from sklearn.neighbors import KNeighborClassifier
 clas = KNeighborsClassifier(n_neighbors = 6, metric = 'minkowski', p = 2)
@@ -358,14 +361,15 @@ y_pred = xg_claf.predict(X_test)
 ## regression
 xg_reg = xgb.XGBRegressor(objective = 'reg:linear',
                           booster = 'gbtree',
-                          max_depth = 5,
-                          early_stopping_rounds = 100,
-                          #learning_rate,
-                          #gamma,
-                          #alpha,
-                          #lambda,
-                          #subsample,
-                          #colsample_bytree)
+                          max_depth = 7,
+                          early_stopping_rounds = 200,
+                          learning_rate = .01,
+                          gamma = 1.5,
+                          #alpha, #lambda,
+                          subsample = .7,
+                          colsample_bytree = .7,
+                          colsample_bylevel = .5
+                          Silent = True)
 xg_reg.fit(X_train, y_train)
 
 ## cross validation xgboost
@@ -400,14 +404,16 @@ plt.show()
 ############# 2) Catboost #############
 from catboost import CatBoostClassifier
 cat_idx
-clas = CatBoostClassifier(iterations = 2,
-                          depth = 2,
+clas = CatBoostClassifier(iterations = 1000,
+                          depth = 5,
                           learning_rate = 0.1,
-                          loss_function = 'Logloss',
-                          logging_level = 'Silent',
-                          plot = True)
+                          colsample_bylevel = .7,
+                          early_stopping_rounds = 200,
+                          bagging_temperature = .2,
+                          eval_metric = 'RMSE',
+                          logging_level = 'Silent')
 clas.fit(X_tr, y_tr, cat_features = cat_idx,
-        eval_set = (X_val, y_val))
+         eval_set = (X_val, y_val), plot = True)
 
 from grader_v2 import Grader
 grader = Grader()

@@ -28,7 +28,7 @@ tr_te = pd.concat([tr, te], axis = 0)
 cat_feats = tr_te.column[tr_te.dtypes == 'object']
 num_feats = tr_te.column[tr_te.dtypes != 'object']
 
-print("Categorical variables ", len(cat_feats), cat_feats)p
+print("Categorical variables ", len(cat_feats), cat_feats)
 print("Numeric variables ", len(num_feats), num_feats)
 
 # Reorganzie mis-classified features if it's neccesssary

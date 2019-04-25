@@ -1,9 +1,5 @@
 ###########################################################
-# install
-'C:\Users\jjone\Anaconda3\Scripts'
-pip install selenium
-Chrome Driver download
-'https://sites.google.com/a/chromium.org/chromedriver/'
+#https://www.w3schools.com/python/python_ref_string.asp
 
 'https://blog.michaelyin.info/how-crawl-infinite-scrolling-pages-using-python/'
 

@@ -441,6 +441,7 @@ my_dates.dt.year
 # indexing
 df.set_index('Date', inplace = True)
 df = df.set_index(my_dates)
+avg_52 = df.rolling(window = 52).mean()
 
 df2 = df.reindex(ts1.index)
 df2 = df.reindex(ts1.index, method = 'ffill')
