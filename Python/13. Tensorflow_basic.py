@@ -1,5 +1,10 @@
+# Pytorch on Colab
+!pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl
+!pip3 install torchvision
+
+import torch
+print(torch.__version__)
 #################################################
-'https://www.kaggle.com/ashishpatel26/tensorflow-for-beginner-to-advance'
 ####################### Basic
 import tensorflow as tf
 

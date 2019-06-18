@@ -140,7 +140,7 @@ cv_score.mean()    # mean accuracy value of validation sets
 cv_score.std()
 
 ###### Stratified Cross Validation
-from sklearn.model_selection import StratifiedKfold
+from sklearn.model_selection import StratifiedKFold
 skfolds = StratifiedKfold(n_splits = 5, random_state = 42)
 
 for tr_idx, te_idx in skfolds.split(X_train, y_train):
@@ -375,10 +375,18 @@ xg_reg.fit(X_train, y_train)
 ## cross validation xgboost
 DM_train = xgb.DMatrix(data= X_train, label= y_train)
 DM_test = xgb.DMatrix(data= X_test, label= y_test)
+
 # Create the parameter dictionary: params
-myParam = {"objective" : "reg:logistic",
-          'booster' : 'gbtree'
-          "max_depth" : 3}
+params = {'objective' : 'reg:linear',
+          'max_depth' : 7,
+          'learning_rate' : 0.005,
+          'early_stopping_rounds' : 500,
+          'gamma' : 1.5,
+          'subsample' : 0.8,
+          'colsample_bytree' : 0.7,
+          'colsample_bylevel' : 0.9,
+          'silent' : True}
+
 # Create list of additional parameters and empty list
 reg_params = [1, 10, 100]
 best_rmse = []
@@ -412,6 +420,7 @@ clas = CatBoostClassifier(iterations = 1000,
                           bagging_temperature = .2,
                           eval_metric = 'RMSE',
                           logging_level = 'Silent')
+
 clas.fit(X_tr, y_tr, cat_features = cat_idx,
          eval_set = (X_val, y_val), plot = True)
 
@@ -422,12 +431,28 @@ grader.submit_tag('logloss_mean', mean)
 
 ############# 3) LightGBM #############
 import lightgbm as lgb
+tr_data = lgb.Dataset(X_tr, label = y_tr)
 
-train_data = lgb.Dataset(X_tr, label = y_tr)
-param = {'num_leaves':150, 'objective':'binary', 'max_depth':7, 'learning_rate':.05,'max_bin':200}
-param['metric'] = ['auc', 'binary_logloss']
-lgbm = lgb.train(param, train_data, 50)
-pred = lgbm.predict(X_te)
+params = {'objective' : 'regression',
+          'max_depth' : 7,
+          #'num_leaves' : 30,
+          'learning_rate': 0.01,
+          'metric' : 'rmse',
+          'min_data_in_leaf' : 100,
+          'colsample_bytree': 0.7,
+          'subsample_freq': 1,
+          'lambda_l1' : 0.2,
+          #'lambda_l2' : .3
+          'subsample' : .7,
+          #"bagging_seed" : 42,
+          "verbose" : -1}
+
+hist = {}
+model_lg = lgb.train(params, tr_data,
+                     num_iteration = 10000,
+                     early_stopping_rounds = 200,
+                     callbacks = [lgb.record_evaluation(hist)])
+pred = model_lg.predict(X_te, num_iteration = model_lg.best_iteration)
 
 #################################################
 ############# Evaluation #############
@@ -514,6 +539,17 @@ cv = RandomizedSearchCV(estimator = clas,
 print(cv.best_score_)
 print(cv.best_params_)
 
+#################################################
+###### Model Save
+import pickle
+pkl_filename = "pickle_model.pkl"
+with open(pkl_filename, 'wb') as file:
+    pickle.dump(model, file)
+
+# Load from file
+with open(pkl_filename, 'rb') as file:
+    pickle_model = pickle.load(file)
+    
 #################################################
 ############# Ensemble #############
 # bagging - changing seed & averaging

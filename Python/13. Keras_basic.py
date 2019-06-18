@@ -59,7 +59,7 @@ model.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = [
 from keras.callbacks import EarlyStopping
 early_stopper = EarlyStopping(patience = 5)
 
-r = model.fit(X_train, y_train, batch_size = 10, nb_epoch = 100, callbacks = [early_stopper])   # validation_split
+r = model.fit(X_train, y_train, batch_size = 10, epochs = 100, callbacks = [early_stopper])   # validation_split
 y_pred = model.predict(X_test)
 
 # plot the error
@@ -82,7 +82,7 @@ model.predict_classes(X_test)
 
 # model save
 model.save('model_file.h5')
-from keras.model import load_model
+from keras.models import load_model
 my_model = load_model('model_file.h5')
 
 ########################## Regularization
@@ -126,12 +126,13 @@ for filename in filenames:
 im_height
 im_weight
 im_size = (im_height, im_width)
-batch_size
+
 
 # initialize the model
 model = Sequential()
 # convolutional layer
-model.add(Conv2D(32, kernel_size = 3, inpurt_shape = (im_width, im_height, 3), activation = 'relu', padding = 'same', strides = 5))
+model.add(Conv2D(32, kernel_size = 3, input_shape = (im_width, im_height, 3),
+                activation = 'relu', padding = 'same', strides = 5))
           # Convolution2D(10, 3, 3)
 # Normalization
 model.add(BatchNormalization())

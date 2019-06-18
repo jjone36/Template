@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+import pandas_profiling
+pandas_profiling.ProfileReport(df)
+
 # Step 0. Understand the data (Please don't skip it)
 
 
