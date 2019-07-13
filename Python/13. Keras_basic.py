@@ -188,11 +188,11 @@ val_generator = val_gen.flow_from_dataframe(val_df, dir,
                                             batch_size= batch_size)
 
 history = model.fit_generator(train_generator,
-                                epochs = 50,
-                                validation_data = val_generator,
-                                validation_steps = val_df.shape[0] // batch_size,
-                                steps_per_epoch= train_df.shape[0] // batch_size,
-                                callbacks = callbacks)
+                              epochs = 50,
+                              validation_data = val_generator,
+                              validation_steps = val_df.shape[0] // batch_size,
+                              steps_per_epoch= train_df.shape[0] // batch_size,
+                              callbacks = callbacks)
 
 # model_saving
 model.save('model_file.h5')

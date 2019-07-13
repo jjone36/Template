@@ -1,65 +1,30 @@
-# Pytorch on Colab
-!pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl
-!pip3 install torchvision
-
-import torch
-print(torch.__version__)
+# https://github.com/jjone36/Coursera_deeplearning_ai/blob/master/course_2_Impriving%20Deep%20Neural%20Networks/5.%20Tensorflow%20Tutorial.ipynb
+# https://github.com/lazyprogrammer/machine_learning_examples/blob/master/ann_class2/tf_with_save.py
+# https://github.com/lazyprogrammer/machine_learning_examples/blob/master/ann_class/tf_example.py
+# https://github.com/lazyprogrammer/machine_learning_examples/blob/master/ann_class2/tensorflow2.py
 #################################################
-####################### Basic
-import tensorflow as tf
-
 a = tf.constant(2)      # create tensors
 b = tf.constant(10)
 c = tf.multiply(a, b)   # write operations between the tenseors
+tf.Variable()
 
-sess = tf.Session()     # create a Session
-print(sess.run(c))      # run the session and initialize the variables
+tf.nn.conv2d()
+tf.nn.batch_normalization()
+tf.nn.relu()
 
+tf.nn.max_pool()
+tf.nn.avg_pool
 
-y_hat = tf.constant(36, name = 'y_hat')
-y = tf.constant(39, name = 'y')
-loss = tf.Variable((y - y_hat)**2, name = 'loss')
+tf.nn.contrib.layers.flatten()
 
-init = tf.global_variables_initializer()
-
-with tf.Session() as sessi:
-    sess.run(init)
-    print(sess.run(loss))
-
-# Placeholders whose values you will specify only later
-x = tf.placeholder(tf.int64, name = 'x')         # create placeholders
-sigmoid = tf.sigmoid()                           # specify the computation graph
-print(sess.run(sigmoid, feed_dict = {x : 3}))    # create and run the session using feed dictionary
-
-sess.close()
-
-####################### Simple ANN
-m, n_input = features.shape
-hidden_1 = 10
-
-X = tf.placeholder(tf.float32, [None, n_input])
-y = tf.placeholder(tf.float32, [None, 1])
-
-Z1 = tf.layers.dense(X, hidden_1, activation_fn = tf.nn.relu)
-A1 = tf.layers.dense(Z1, 1)
+tf.reduce_max()
+tf.reduce_sum()
+tf.exp()
+cost = tf.nn.sigmoid_cross_entropy_with_logits(logits, labels)
+cost = sess.run(cost, feed_dict = {z : logits, y : labels})
 
 loss = tf.losses.mean_squared_error(logits = A1, labels = y)
 optimizer = tf.train.GradientDescentOptimizer(learning_rate = .01).minimize(loss)
-
-# Model saver
-def saver():
-
-    init = tf.global_variables_initializer()
-
-    with tf.Session() as sess:
-    sess.run(init)
-
-    saver = tf.train.Saver()
-    for step in range(100):
-        sess.run([optimizer, loss], feed_dict = {X : X_train, y : y_train})
-
-    saver.save(sess, save_path, write_meta_graph = False)
-
 #####################################################################
 ############# Preprocessing
 im_size = 64
@@ -178,7 +143,7 @@ def plot_cost(costs, y_hat, y):
     accuracy = tf.reduce_mean(tf.cast(correct_pred, 'float'))
     return accuracy
 
-############# Computing
+# Build
 learning_rate = .01
 epochs = 10
 batch_size = 300
@@ -229,3 +194,53 @@ def model(X_train, y_train, learning_rate = learning_rate, epochs = epochs, batc
     # step 7. plot the cost
     acc = plot_cost(costs, y_hat = Z3, y = y_train)
     return acc
+
+
+#####################################################################
+############# slim
+import tensorflow.contrib.slim as slim
+
+def MyModel(images, num_classes):
+    net = slim.fully_connected(input, 512, scope = 'fc1')
+    logits = slim.fully_connected(net, num_classes, activation_fn = None, scope = 'fc2')
+    pred = tf.nn.softmax(logits)
+    return logits, pred
+
+with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                    weights_regularizer=slim.l2_regularizer(0.0001)):
+    with slim.arg_scope([slim.conv2d],
+                        wieghts_initializer = tf.truncated_normal_initializer(0.1),
+                        activation_fn = tf.nn.relu,
+                        normalizer_params = {'epsilon': .1, 'decay': .997})
+        Logits = MyModel(images, num_classes, is_training = False)
+
+
+#####################################################################
+############# Simple ANN
+m, n_input = features.shape
+hidden_1 = 10
+
+# Initialize variables
+X = tf.placeholder(tf.float32, [None, n_input])
+y = tf.placeholder(tf.float32, [None, 1])
+
+# Build
+Z1 = tf.layers.dense(X, hidden_1, activation_fn = tf.nn.relu)
+A1 = tf.layers.dense(Z1, 1)
+
+# Define loss, optimizer
+loss = tf.losses.mean_squared_error(logits = A1, labels = y)
+optimizer = tf.train.GradientDescentOptimizer(learning_rate = .01).minimize(loss)
+
+# Start off session
+with tf.Session() as sess:
+
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    for batch in
+    saver = tf.train.Saver()
+    for step in range(100):
+        sess.run([optimizer, loss], feed_dict = {X : X_train, y : y_train})
+
+    saver.save(sess, save_path, write_meta_graph = False)

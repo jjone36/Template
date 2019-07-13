@@ -1,4 +1,5 @@
 # http://www.colors.commutercreative.com/grid/
+# https://www.machinelearningplus.com/plots/top-50-matplotlib-visualizations-the-master-plots-python/
 
 import pandas as pd
 import matplotlib.pyplot as plt

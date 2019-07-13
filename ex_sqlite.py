@@ -4,7 +4,6 @@ import sqlite3
 import pandas as pd
 
 df = pd.read_csv('tube_all.csv')
-df = df.iloc[:30, :]
 
 #conn = sqlite3.connect(':memory:')
 conn = sqlite3.connect(database = 'tube.db')
@@ -31,6 +30,7 @@ def save_in_db(row):
     with conn:
         c.execute("INSERT INTO tube VALUES (:channel_id, :name, :subscriberCount)",
                 {'channel_id': row.channel_id, 'name': row.name, 'subscriberCount': row.chn_subscriberCount2})
+
         c.execute("INSERT INTO videos VALUES (:video_id, :video_title, :viewcounts, :channel)",
                 {'video_id': row.video_id, 'video_title': row.title, 'viewcounts': row.viewCount, 'channel':row.channel_id})
 
@@ -45,9 +45,8 @@ def search_by_channel_name(channel_id):
     c.execute("SELECT * FROM tube WHERE channel_id=:channel_id", {'channel_id':channel_id})
     return c.fetchmany(5)
 
-for i in range(len(df)):
-    data = df.iloc[i, :]
-    save_in_db(data)
+for i in range(len(df_chn)):
+    save_in_db(df_chn)
 
 #update_pay(data)
 #c.fetchall()
