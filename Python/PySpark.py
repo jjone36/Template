@@ -16,11 +16,11 @@ import findspark
 findspark.init('/home/jjone/spark-2.3.1-bin-hadoop2.7')
 
 from pyspark.sql import SparkSession
-spark = SparkSession.builder.appName('basic').getOrCreate()
+spark = SparkSession.builder.master('local[*]').appName('test').getOrCreate()
 spark = SparkSession.builder.getOrCreate()
 
 # importing data
-airport = spark.read.csv('appl_stock.csv', inferSchema = True, header = True)
+airport = spark.read.csv('appl_stock.csv', inferSchema = True, header = True, nullValue = 'NA')
 fg = spark.table('flights')
 fg
 fg.printSchema()
@@ -29,6 +29,9 @@ fg.show()
 # add new column
 fg = fg.withColumn('flight_hrs', fg.air_time/60)
 fg = fg.withColumnRenamed('dist', 'distance')
+
+# drop a column
+fg = fg.drop('dist')
 
 # asDict()
 fg.filter(fg.dist > 100).show()
@@ -66,6 +69,7 @@ fg_plane = fg.join(plane, on = 'tailnum', how = 'leftouter')
 #  missing values
 data = data.filter("arr_delay is not NULL and dep_delay is not NULL")
 
+data.dropna()
 data.na.drop(thresh = 5).show()
 data.na.drop(how = 'any')   # 'all'
 data.na.drop(subset = ['dist'])
@@ -102,6 +106,11 @@ carr_encoder = OneHotEncoder(inputCol = 'carrier_index', outputCol = 'carrier_fa
 dest_indexer = StringIndexer(inputCol= 'dest', outputCol = 'dest_index')
 dest_encoder = OneHotEncoder(inputCol = 'dest_index', outputCol = 'dest_fact')
 
+# bucketing
+from pyspark.ml.feature import Bucketizer
+bucketor = Bucketizer(splits = [0, 3, 6, 9], inputCol = 'depart', outputCol = 'depart_bins')
+data_bucket = bucketor.transform(data)
+
 # combine all columns into one feature
 from pyspark.ml.feature import VectorAssembler
 assembler = VectorAssembler(inputCol= ['air_time', 'is_late', 'plane_age', 'carrier_fact', 'dest_fact'],
@@ -130,24 +139,27 @@ evaluator = evals.BinaryClassificationEvaluator(rawPredictionCol = 'prediction',
 AUC = evaluator.evaluate(pred)
 AUC
 
+
 ############# model tunning
 from pyspark.ml.tuning import ParamGridBuilder
-grid = ParamGridBuilder()
-grid = grid.addGrid(lr.regParam, np.arange(0, .1, .01))
-grid = grid.addGrid(lr.elasticNetParam, [0, 1])
-grid = grid.build()
+params = ParamGridBuilder()
+params = params.addGrid(lr.regParam, np.arange(0, .1, .01))
+params = params.addGrid(lr.elasticNetParam, [0, .5, 1])
+params = params.build()
+print("Number of models to be tested:", len(params))
 
 # create the CrossValidator
 from pyspark.ml.tuning import CrossValidator
 cv = CrossValidator(estimator = lr,
-                    estimatorParamMaps = grid,
+                    estimatorParamMaps = params,
                     evaluator = evaluator)
+cv = cv.setNumFolds(10).setSeed(24).fit(tr)
 
-models = cv.fit(tr)
 # extract the best model
-best_model = models.bestModel
+best_model = cv.bestModel
 pred = best_model.transform(te)
 print(evaluator.evaluate(pred))
+cv.avgMetrics
 
 #####################################################################
 # https://spark.apache.org/docs/latest/ml-guide.html
@@ -165,6 +177,10 @@ result.residauls.show()
 model.summary.r2
 model.summary.rootMeanSquaredError
 
+############# Lasso/Ridge Regression
+ls = LinearRegression(labelCol = 'Survived', elasticNetParam = 1, regParam = .1)
+ls.fit(tr)
+
 ############# 2) Logisitc Regression
 from pyspark.ml.classification import LogisticRegression
 lr = LogisticRegression(featuresCol = 'features', labelCol = 'Survived')
@@ -172,6 +188,8 @@ model = lr.fit(tr)
 pred = model.transform(te)
 
 # evaluation
+prediction.groupBy('label', 'prediction').count().show()
+
 model.summary.predictions.printSchema
 model.summary.predictions.describe().show()
 
@@ -180,7 +198,7 @@ evaluator = evals.BinaryClassificationEvaluator(rawPredictionCol = 'prediction',
 auc = evaluator.evaluate(model.summary.predictions)
 auc
 
-result = model.evaluate(te)
+result = model.evaluate(predictions)
 result.show()
 result.predictions.show()
 
@@ -198,6 +216,7 @@ evaluator = MulticlassClassificationEvaluator(labelCol = 'Survived', metricName 
 evaluator.evaluate(pred)
 
 model.featureImportances
+model.getNumTrees
 
 ############# 4) K-means Clustering
 # combine all columns into one feature
@@ -223,6 +242,9 @@ result.groupBy('prediction').count().show()
 
 #####################################################################
 ############# Natural Language Preprocessing
+from pyspark.sql.functions import regexp_replace
+data_cleaned = data.withColumn('text', regexp_replace(data.text, '[0-9]', ''))
+
 from pyspark.ml.feature import Tokenizer, RegexTokenizer
 tokenizer = Tokenizer(inputCol = 'text', outputCol = 'token')
 tokenizer2 = RegexTokenizer(inputCol = 'text', outputCol = 'token', pattern = '#\w+')

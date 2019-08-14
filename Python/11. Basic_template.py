@@ -198,7 +198,7 @@ for alpha in alpha_space:
 display_plot(ridge_scores, ridge_scores_std)
 
 
-###### Lasso   (-> feature selection)
+###### Lasso
 from sklearn.linear_model import Lasso
 lasso = Lasso(alpha, normalize = True)
 lasso.fit(X_train, y_train)
@@ -283,7 +283,10 @@ clas.fit(X_train, y_train)
 
 ############# 5) Random Forest #############
 from sklearn.ensemble import RandomForestRegressor
-reg = RandomForestRegressor(n_estimators = 100, max_depth = 5)
+reg = RandomForestRegressor(n_estimators = 100,
+                            criterion="mse",
+                            min_samples_split= .7,
+                            max_depth = 5)
 reg.fit(X_train, y_train)
 
 from sklearn.ensemble import RandomForestClassifier
@@ -514,19 +517,17 @@ myParam = {'learning_rate': [0.01, 0.05, 0.1, 0.5],
            'n_estimators': [200],
            'subsample': [.3, .5, .7]}
 
-cv = GridSearchCV(estimator = clas,  # reg
+# Grid Search
+myParam = {}
+cv = GridSearchCV(estimator = model,
                   param_grid = myParam,
-                  scoring = 'accuracy',
-                  '''n_jobs = -1,'''
-                  cv = 10,
-                  verbose = 1)
-cv = cv.fit(X_train, y_train)
-
-best_score = cv.best_score_
-print("Best score is {}".format(best_score))
-best_param = cv.best_params_
-print(best_param)
-
+                  scoring = 'neg_mean_squared_error',   # 'neg_mean_squared_log_error'
+                  cv = 5,
+                  verbose = 0)
+cv = cv.fit(X_tr, y_tr)
+print("=======================================")
+print("Best score is {}".format(cv.best_score_))
+print(cv.best_params_)
 
 # Randomized Grid Search
 from sklearn.model_selection import RandomizedSearchCV
@@ -539,6 +540,7 @@ cv = RandomizedSearchCV(estimator = clas,
 print(cv.best_score_)
 print(cv.best_params_)
 
+
 #################################################
 ###### Model Save
 import pickle
@@ -549,7 +551,7 @@ with open(pkl_filename, 'wb') as file:
 # Load from file
 with open(pkl_filename, 'rb') as file:
     pickle_model = pickle.load(file)
-    
+
 #################################################
 ############# Ensemble #############
 # bagging - changing seed & averaging
@@ -579,7 +581,37 @@ stacked_te = np.column_stack((te_pred_1, te_pred_2))
 meta_model.fit(stacked_valid, y_val)
 final_pred = meta_model.predict(stacked_te)
 
-############# Variable Selection functions #############
+############# Feature Selection  #############
+# 1. Recursive Feature Elimination
+from sklearn.feature_selection import RFECV
+rfe = RFECV(estimator = LogisticRegression(), cv=5, scoring='accuracy')
+rfe = rfe.fit(X_train, y_train)
+
+# Select variables and calulate test accuracy
+cols = X_train.columns[rfe.support_]
+acc = accuracy_score(y_test, rfe.estimator_.predict(X_test[cols]))
+print('Number of features selected: {}'.format(rfe.n_features_))
+print('Test Accuracy {}'.format(acc))
+
+# Plot number of features vs CV scores
+plt.figure()
+plt.xlabel('k')
+plt.ylabel('CV accuracy')
+plt.plot(np.arange(1, rfe.grid_scores_.size+1), rfe.grid_scores_)
+plt.show()
+
+
+# 2. Boruta Feature Selection
+from boruta import BorutaPy
+boruta = BorutaPy(model, n_estimators='auto', verbose=2)
+boruta.fit(X_tr.values, y_tr.values.ravel())
+
+# Select features and fit Logistic Regression
+cols = X_tr.columns[boruta.support_]
+est_boruta = LogisticRegression()
+est_boruta.fit(X_tr[cols], y_tr)
+
+
 # Building the optimal model using Backward Eliminations
 import statsmodels.formula.api as sm
 

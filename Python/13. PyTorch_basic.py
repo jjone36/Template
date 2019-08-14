@@ -1,5 +1,7 @@
 # https://jhui.github.io/2018/02/09/PyTorch-neural-networks/
 # https://deeplizard.com/learn/video/0LhiS6yu2qQ
+
+# https://pytorch.org/docs/stable/nn.html
 #################################################
 # Installation
 !pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl
@@ -14,7 +16,7 @@ x = torch.range(1, 16)
 x = x.view(4, 4)
 x = x.view(2, -1, 2)    # x.view(2, 4, 2)
 
-torch.ca((X1, X2), dim = 0)   # row-wise
+torch.cat((X1, X2), dim = 0)   # row-wise
 torch.stack((X1, X2))
 
 #################################################

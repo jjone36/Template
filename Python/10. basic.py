@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#   C:\Users\jjone\Anaconda3\Scripts\activate.bat C:\Users\jjone\Anaconda3
+#C:\Users\jjone\Anaconda3\Scripts\activate.bat C:\Users\jjone\Anaconda3
 ####################### list method #######################
 areas = [11.25, 18.0, 20.0, 10.75, 9.50]
 print(areas.index(20.0))
@@ -218,7 +218,7 @@ iris_melt['Measure'] = iris_melt.splitted.str.get(1)
 
 # rbind(), cbind()
 combined = df1.append(df2, ignore_index = True)
-row_concat = pd.concat([df1, df2, df3])
+row_concat = cat([df1, df2, df3])
 
 col_concat = pd.concat([df1, df2, df3], keys = ['A1', 'A2', 'A3'], axis = 1, join = 'inner')
 # axis = 0: rows(vertically) / 1: columns(izontally)
