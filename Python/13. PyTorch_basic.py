@@ -3,10 +3,6 @@
 
 # https://pytorch.org/docs/stable/nn.html
 #################################################
-# Installation
-!pip3 install http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp36-cp36m-linux_x86_64.whl
-!pip3 install torchvision
-
 import torch
 print(torch.__version__)
 
@@ -25,6 +21,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import pytorch.optim as optim
+
 
 class Model(nn.Module):
 

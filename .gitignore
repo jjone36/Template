@@ -1,6 +1,7 @@
 *.png
-*.json
 *.csv
 install_packages.R
 .ipynb_checkpoints
+.vscode/
+
 __pycache__

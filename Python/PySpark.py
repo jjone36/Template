@@ -5,8 +5,15 @@ stmt = 'FROM flights SELECT * LIMIT 10'
 movie = spark.sql(stmt)
 movie.show()
 
-movie_df = movie.toPandas()     # spark -> pd
+# sample the data, convert to panda and make a plot
+movie_sample = movie.select(['budget', 'n_languages']).sample(False, .3, seed = 42)
+movie_df = movie_sample.toPandas()     # spark -> pd
 movie_df.head()
+sns.distplot(movie_df)
+
+movie_df.isnull()
+movie_df.where(df['budget'].isNull()).count()
+
 # Add spark_temp to the catalog
 movie_spark_temp = spark.createDataFrame(movie_df)     # pd -> spark: temporary local table
 spark.catalog.listTables()
@@ -19,12 +26,18 @@ from pyspark.sql import SparkSession
 spark = SparkSession.builder.master('local[*]').appName('test').getOrCreate()
 spark = SparkSession.builder.getOrCreate()
 
-# importing data
+# importing CSV file
 airport = spark.read.csv('appl_stock.csv', inferSchema = True, header = True, nullValue = 'NA')
 fg = spark.table('flights')
 fg
 fg.printSchema()
 fg.show()
+
+# import various files
+df = spark.read.json('example.json')
+df = spark.read.parquet('example.parq')
+print(df.columns)
+df.count()
 
 # add new column
 fg = fg.withColumn('flight_hrs', fg.air_time/60)
@@ -32,13 +45,16 @@ fg = fg.withColumnRenamed('dist', 'distance')
 
 # drop a column
 fg = fg.drop('dist')
+fg.dropDuplicate()
 
 # asDict()
-fg.filter(fg.dist > 100).show()
+fg.filter(fg.dist > 100).show(10)
 result = fg.filter(fg.dist > 100).collect()
 result[0].asDict()
 
 # SELECT
+fg.select('origin').describe().show()
+
 fg_sub = fg.select('tailnum', 'origin' 'dest', 'dist')
 fg_sub = fg.select(fg.tailnum, fg.origin, fg.dest, fg.dist)
 
@@ -71,7 +87,7 @@ data = data.filter("arr_delay is not NULL and dep_delay is not NULL")
 
 data.dropna()
 data.na.drop(thresh = 5).show()
-data.na.drop(how = 'any')   # 'all'
+data.na.drop(how = 'any')          # 'all'
 data.na.drop(subset = ['dist'])
 
 data.na.fill(0).show()
@@ -90,6 +106,8 @@ data = data.withColumn('year', year(df['date']))
 # correlation
 from pyspark.sql.functions import corr
 data.select(corr('dist', 'time')).show()
+
+data.agg({'dist' : 'mean'}).collect()
 
 #####################################################################
 ############# feature engineering
